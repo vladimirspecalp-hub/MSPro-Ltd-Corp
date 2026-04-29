@@ -93,7 +93,7 @@ import {
   MessageSquare,
   MoreHorizontal,
   MoreVertical,
-  MSProLtd,
+  Paperclip,
   Plus,
   Repeat,
   SlidersHorizontal,
@@ -2152,7 +2152,7 @@ export function IssueDetail() {
           attachmentDragActive && "border-primary bg-primary/5",
         )}
       >
-        <MSProLtd className="h-3.5 w-3.5 mr-1.5" />
+        <Paperclip className="h-3.5 w-3.5 mr-1.5" />
         {uploadAttachment.isPending || importMarkdownDocument.isPending ? t("issue_detail.uploading") : (
           <>
             <span className="hidden sm:inline">{t("issue_detail.upload_attachment")}</span>
