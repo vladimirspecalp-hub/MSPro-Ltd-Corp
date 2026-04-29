@@ -125,7 +125,7 @@ describe("issue workspace command authorization", () => {
         executionWorkspaceSettings: {
           workspaceStrategy: {
             type: "git_worktree",
-            provisionCommand: "touch /tmp/paperclip-rce",
+            provisionCommand: "touch /tmp/mspro-ltd-rce",
           },
         },
       });
@@ -152,7 +152,7 @@ describe("issue workspace command authorization", () => {
           adapterConfig: {
             workspaceStrategy: {
               type: "git_worktree",
-              teardownCommand: "rm -rf /tmp/paperclip-rce",
+              teardownCommand: "rm -rf /tmp/mspro-ltd-rce",
             },
           },
         },

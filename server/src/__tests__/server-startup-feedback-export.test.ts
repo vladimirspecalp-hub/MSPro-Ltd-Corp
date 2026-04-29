@@ -43,7 +43,7 @@ vi.mock("detect-port", () => ({
   default: detectPortMock,
 }));
 
-vi.mock("@paperclipai/db", () => ({
+vi.mock("@msproltd/db", () => ({
   createDb: createDbMock,
   ensurePostgresDatabase: vi.fn(),
   getPostgresDataDirectory: vi.fn(),
@@ -75,21 +75,21 @@ vi.mock("../config.js", () => ({
     authPublicBaseUrl: undefined,
     authDisableSignUp: false,
     databaseMode: "postgres",
-    databaseUrl: "postgres://paperclip:paperclip@127.0.0.1:5432/paperclip",
-    embeddedPostgresDataDir: "/tmp/paperclip-test-db",
+    databaseUrl: "postgres://mspro-ltd:mspro-ltd@127.0.0.1:5432/mspro-ltd",
+    embeddedPostgresDataDir: "/tmp/mspro-ltd-test-db",
     embeddedPostgresPort: 54329,
     databaseBackupEnabled: false,
     databaseBackupIntervalMinutes: 60,
     databaseBackupRetentionDays: 30,
-    databaseBackupDir: "/tmp/paperclip-test-backups",
+    databaseBackupDir: "/tmp/mspro-ltd-test-backups",
     serveUi: false,
     uiDevMiddleware: false,
     secretsProvider: "local_encrypted",
     secretsStrictMode: false,
-    secretsMasterKeyFilePath: "/tmp/paperclip-master.key",
+    secretsMasterKeyFilePath: "/tmp/mspro-ltd-master.key",
     storageProvider: "local_disk",
-    storageLocalDiskBaseDir: "/tmp/paperclip-storage",
-    storageS3Bucket: "paperclip-test",
+    storageLocalDiskBaseDir: "/tmp/mspro-ltd-storage",
+    storageS3Bucket: "mspro-ltd-test",
     storageS3Region: "us-east-1",
     storageS3Endpoint: undefined,
     storageS3Prefix: "",
@@ -181,26 +181,26 @@ describe("startServer feedback export wiring", () => {
   });
 });
 
-describe("startServer PAPERCLIP_API_URL handling", () => {
+describe("startServer MSPROLTD_API_URL handling", () => {
   beforeEach(() => {
     vi.clearAllMocks();
     process.env.BETTER_AUTH_SECRET = "test-secret";
-    delete process.env.PAPERCLIP_API_URL;
+    delete process.env.MSPROLTD_API_URL;
   });
 
-  it("uses the externally set PAPERCLIP_API_URL when provided", async () => {
-    process.env.PAPERCLIP_API_URL = "http://custom-api:3100";
+  it("uses the externally set MSPROLTD_API_URL when provided", async () => {
+    process.env.MSPROLTD_API_URL = "http://custom-api:3100";
 
     const started = await startServer();
 
     expect(started.apiUrl).toBe("http://custom-api:3100");
-    expect(process.env.PAPERCLIP_API_URL).toBe("http://custom-api:3100");
+    expect(process.env.MSPROLTD_API_URL).toBe("http://custom-api:3100");
   });
 
-  it("falls back to host-based URL when PAPERCLIP_API_URL is not set", async () => {
+  it("falls back to host-based URL when MSPROLTD_API_URL is not set", async () => {
     const started = await startServer();
 
     expect(started.apiUrl).toBe("http://127.0.0.1:3210");
-    expect(process.env.PAPERCLIP_API_URL).toBe("http://127.0.0.1:3210");
+    expect(process.env.MSPROLTD_API_URL).toBe("http://127.0.0.1:3210");
   });
 });

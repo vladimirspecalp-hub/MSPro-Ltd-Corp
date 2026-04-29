@@ -1,7 +1,7 @@
 import { readFile, readdir } from "node:fs/promises";
 import path from "node:path";
 import { and, asc, desc, eq, getTableColumns, gte, lte, ne, or } from "drizzle-orm";
-import type { Db } from "@paperclipai/db";
+import type { Db } from "@msproltd/db";
 import {
   agents,
   companies,
@@ -17,9 +17,9 @@ import {
   issueComments,
   issueDocuments,
   issues,
-} from "@paperclipai/db";
-import { readPaperclipSkillSyncPreference } from "@paperclipai/adapter-utils/server-utils";
-import { claudeConfigDir, parseClaudeStreamJson } from "@paperclipai/adapter-claude-local/server";
+} from "@msproltd/db";
+import { readPaperclipSkillSyncPreference } from "@msproltd/adapter-utils/server-utils";
+import { claudeConfigDir, parseClaudeStreamJson } from "@msproltd/adapter-claude-local/server";
 // MSPRO fork: codex-local и opencode-local удалены — stubs для неисполняемых веток feedback
 const codexHomeDir = (): string => "";
 function parseCodexJsonl(_jsonl: string): unknown { return null; }
@@ -36,7 +36,7 @@ import {
   type FeedbackTraceStatus,
   type FeedbackTraceTargetSummary,
   type FeedbackVoteValue,
-} from "@paperclipai/shared";
+} from "@msproltd/shared";
 import { resolveHomeAwarePath, resolvePaperclipInstanceRoot } from "../home-paths.js";
 import { notFound, unprocessable } from "../errors.js";
 import { agentInstructionsService } from "./agent-instructions.js";
@@ -49,9 +49,9 @@ import {
 } from "./feedback-redaction.js";
 import { getRunLogStore } from "./run-log-store.js";
 
-const FEEDBACK_SCHEMA_VERSION = "paperclip-feedback-envelope-v2";
-const FEEDBACK_BUNDLE_VERSION = "paperclip-feedback-bundle-v2";
-const FEEDBACK_PAYLOAD_VERSION = "paperclip-feedback-v1";
+const FEEDBACK_SCHEMA_VERSION = "mspro-ltd-feedback-envelope-v2";
+const FEEDBACK_BUNDLE_VERSION = "mspro-ltd-feedback-bundle-v2";
+const FEEDBACK_PAYLOAD_VERSION = "mspro-ltd-feedback-v1";
 const FEEDBACK_DESTINATION = "paperclip_labs_feedback_v1";
 const FEEDBACK_CONTEXT_WINDOW = 3;
 const MAX_EXCERPT_CHARS = 200;
@@ -587,7 +587,7 @@ async function buildOpenCodeTraceFiles(input: {
   }
 
   const opencodeRoot = resolveHomeAwarePath(
-    process.env.PAPERCLIP_OPENCODE_STORAGE_DIR ?? "~/.local/share/opencode",
+    process.env.MSPROLTD_OPENCODE_STORAGE_DIR ?? "~/.local/share/opencode",
   );
   const sessionRoot = path.join(opencodeRoot, "storage", "session");
   const diffRoot = path.join(opencodeRoot, "storage", "session_diff");
@@ -1295,7 +1295,7 @@ async function buildAgentContext(
         entryBody,
       }
       : null,
-    paperclip: {
+    mspro-ltd: {
       schemaVersion: FEEDBACK_SCHEMA_VERSION,
       bundleVersion: FEEDBACK_BUNDLE_VERSION,
     },
@@ -1353,7 +1353,7 @@ async function buildPayloadArtifacts(
   const basePayload = {
     schemaVersion: FEEDBACK_SCHEMA_VERSION,
     bundleVersion: FEEDBACK_BUNDLE_VERSION,
-    sourceApp: "paperclip",
+    sourceApp: "mspro-ltd",
     capturedAt: input.now.toISOString(),
     consentVersion: input.consentVersion,
     vote: {
@@ -1524,7 +1524,7 @@ async function buildFeedbackTraceBundleFromRow(
       ) as Record<string, unknown>;
 
       files.push(makeBundleFile({
-        path: "paperclip/run.json",
+        path: "mspro-ltd/run.json",
         contentType: "application/json",
         source: "paperclip_run",
         contents: `${JSON.stringify(paperclipRun, null, 2)}\n`,
@@ -1537,7 +1537,7 @@ async function buildFeedbackTraceBundleFromRow(
         MAX_TRACE_FILE_CHARS,
       );
       files.push(makeBundleFile({
-        path: "paperclip/run-events.json",
+        path: "mspro-ltd/run-events.json",
         contentType: "application/json",
         source: "paperclip_run_events",
         contents: `${JSON.stringify(sanitizedEvents, null, 2)}\n`,
@@ -1545,7 +1545,7 @@ async function buildFeedbackTraceBundleFromRow(
 
       if (logText) {
         files.push(makeBundleFile({
-          path: "paperclip/run-log.ndjson",
+          path: "mspro-ltd/run-log.ndjson",
           contentType: "application/x-ndjson",
           source: "paperclip_run_log",
           contents: `${sanitizeFeedbackText(logText, state, "bundle.paperclipRun.log", MAX_TRACE_FILE_CHARS)}\n`,

@@ -15,21 +15,21 @@ describe("home path resolution", () => {
     process.env = { ...ORIGINAL_ENV };
   });
 
-  it("defaults to ~/.paperclip and default instance", () => {
-    delete process.env.PAPERCLIP_HOME;
-    delete process.env.PAPERCLIP_INSTANCE_ID;
+  it("defaults to ~/.mspro-ltd and default instance", () => {
+    delete process.env.MSPROLTD_HOME;
+    delete process.env.MSPROLTD_INSTANCE_ID;
 
     const paths = describeLocalInstancePaths();
-    expect(paths.homeDir).toBe(path.resolve(os.homedir(), ".paperclip"));
+    expect(paths.homeDir).toBe(path.resolve(os.homedir(), ".mspro-ltd"));
     expect(paths.instanceId).toBe("default");
-    expect(paths.configPath).toBe(path.resolve(os.homedir(), ".paperclip", "instances", "default", "config.json"));
+    expect(paths.configPath).toBe(path.resolve(os.homedir(), ".mspro-ltd", "instances", "default", "config.json"));
   });
 
-  it("supports PAPERCLIP_HOME and explicit instance ids", () => {
-    process.env.PAPERCLIP_HOME = "~/paperclip-home";
+  it("supports MSPROLTD_HOME and explicit instance ids", () => {
+    process.env.MSPROLTD_HOME = "~/mspro-ltd-home";
 
     const home = resolvePaperclipHomeDir();
-    expect(home).toBe(path.resolve(os.homedir(), "paperclip-home"));
+    expect(home).toBe(path.resolve(os.homedir(), "mspro-ltd-home"));
     expect(resolvePaperclipInstanceId("dev_1")).toBe("dev_1");
   });
 

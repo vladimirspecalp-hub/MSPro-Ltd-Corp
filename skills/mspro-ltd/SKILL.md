@@ -1,37 +1,37 @@
 ---
-name: paperclip
+name: mspro-ltd
 description: >
-  Interact with the Paperclip control plane API to manage tasks, coordinate with
+  Interact with the MSProLtd control plane API to manage tasks, coordinate with
   other agents, and follow company governance. Use when you need to check
   assignments, update task status, delegate work, post comments, set up or manage
-  routines (recurring scheduled tasks), or call any Paperclip API endpoint. Do NOT
+  routines (recurring scheduled tasks), or call any MSProLtd API endpoint. Do NOT
   use for the actual domain work itself (writing code, research, etc.) — only for
-  Paperclip coordination.
+  MSProLtd coordination.
 ---
 
-# Paperclip Skill
+# MSProLtd Skill
 
-You run in **heartbeats** — short execution windows triggered by Paperclip. Each heartbeat, you wake up, check your work, do something useful, and exit. You do not run continuously.
+You run in **heartbeats** — short execution windows triggered by MSProLtd. Each heartbeat, you wake up, check your work, do something useful, and exit. You do not run continuously.
 
 ## Authentication
 
-Env vars auto-injected: `PAPERCLIP_AGENT_ID`, `PAPERCLIP_COMPANY_ID`, `PAPERCLIP_API_URL`, `PAPERCLIP_RUN_ID`. Optional wake-context vars may also be present: `PAPERCLIP_TASK_ID` (issue/task that triggered this wake), `PAPERCLIP_WAKE_REASON` (why this run was triggered), `PAPERCLIP_WAKE_COMMENT_ID` (specific comment that triggered this wake), `PAPERCLIP_APPROVAL_ID`, `PAPERCLIP_APPROVAL_STATUS`, and `PAPERCLIP_LINKED_ISSUE_IDS` (comma-separated). For local adapters, `PAPERCLIP_API_KEY` is auto-injected as a short-lived run JWT. For non-local adapters, your operator should set `PAPERCLIP_API_KEY` in adapter config. All requests use `Authorization: Bearer $PAPERCLIP_API_KEY`. All endpoints under `/api`, all JSON. Never hard-code the API URL.
+Env vars auto-injected: `MSPROLTD_AGENT_ID`, `MSPROLTD_COMPANY_ID`, `MSPROLTD_API_URL`, `MSPROLTD_RUN_ID`. Optional wake-context vars may also be present: `MSPROLTD_TASK_ID` (issue/task that triggered this wake), `MSPROLTD_WAKE_REASON` (why this run was triggered), `MSPROLTD_WAKE_COMMENT_ID` (specific comment that triggered this wake), `MSPROLTD_APPROVAL_ID`, `MSPROLTD_APPROVAL_STATUS`, and `MSPROLTD_LINKED_ISSUE_IDS` (comma-separated). For local adapters, `MSPROLTD_API_KEY` is auto-injected as a short-lived run JWT. For non-local adapters, your operator should set `MSPROLTD_API_KEY` in adapter config. All requests use `Authorization: Bearer $MSPROLTD_API_KEY`. All endpoints under `/api`, all JSON. Never hard-code the API URL.
 
-Some adapters also inject `PAPERCLIP_WAKE_PAYLOAD_JSON` on comment-driven wakes. When present, it contains the compact issue summary and the ordered batch of new comment payloads for this wake. Use it first. For comment wakes, treat that batch as the highest-priority new context in the heartbeat: in your first task update or response, acknowledge the latest comment and say how it changes your next action before broad repo exploration or generic wake boilerplate. Only fetch the thread/comments API immediately when `fallbackFetchNeeded` is true or you need broader context than the inline batch provides.
+Some adapters also inject `MSPROLTD_WAKE_PAYLOAD_JSON` on comment-driven wakes. When present, it contains the compact issue summary and the ordered batch of new comment payloads for this wake. Use it first. For comment wakes, treat that batch as the highest-priority new context in the heartbeat: in your first task update or response, acknowledge the latest comment and say how it changes your next action before broad repo exploration or generic wake boilerplate. Only fetch the thread/comments API immediately when `fallbackFetchNeeded` is true or you need broader context than the inline batch provides.
 
-Manual local CLI mode (outside heartbeat runs): use `paperclipai agent local-cli <agent-id-or-shortname> --company-id <company-id>` to install Paperclip skills for Claude/Codex and print/export the required `PAPERCLIP_*` environment variables for that agent identity.
+Manual local CLI mode (outside heartbeat runs): use `msproltdai agent local-cli <agent-id-or-shortname> --company-id <company-id>` to install MSProLtd skills for Claude/Codex and print/export the required `MSPROLTD_*` environment variables for that agent identity.
 
-**Run audit trail:** You MUST include `-H 'X-Paperclip-Run-Id: $PAPERCLIP_RUN_ID'` on ALL API requests that modify issues (checkout, update, comment, create subtask, release). This links your actions to the current heartbeat run for traceability.
+**Run audit trail:** You MUST include `-H 'X-MSProLtd-Run-Id: $MSPROLTD_RUN_ID'` on ALL API requests that modify issues (checkout, update, comment, create subtask, release). This links your actions to the current heartbeat run for traceability.
 
 ## The Heartbeat Procedure
 
 Follow these steps every time you wake up:
 
-**Scoped-wake fast path.** If the user message includes a **"Paperclip Resume Delta"** or **"Paperclip Wake Payload"** section that names a specific issue, **skip Steps 1–4 entirely**. Go straight to **Step 5 (Checkout)** for that issue, then continue with Steps 6–9. The scoped wake already tells you which issue to work on — do NOT call `/api/agents/me`, do NOT fetch your inbox, do NOT pick work. Just checkout, read the wake context, do the work, and update.
+**Scoped-wake fast path.** If the user message includes a **"MSProLtd Resume Delta"** or **"MSProLtd Wake Payload"** section that names a specific issue, **skip Steps 1–4 entirely**. Go straight to **Step 5 (Checkout)** for that issue, then continue with Steps 6–9. The scoped wake already tells you which issue to work on — do NOT call `/api/agents/me`, do NOT fetch your inbox, do NOT pick work. Just checkout, read the wake context, do the work, and update.
 
 **Step 1 — Identity.** If not already in context, `GET /api/agents/me` to get your id, companyId, role, chainOfCommand, and budget.
 
-**Step 2 — Approval follow-up (when triggered).** If `PAPERCLIP_APPROVAL_ID` is set (or wake reason indicates approval resolution), review the approval first:
+**Step 2 — Approval follow-up (when triggered).** If `MSPROLTD_APPROVAL_ID` is set (or wake reason indicates approval resolution), review the approval first:
 
 - `GET /api/approvals/{approvalId}`
 - `GET /api/approvals/{approvalId}/issues`
@@ -42,12 +42,12 @@ Follow these steps every time you wake up:
 
 **Step 3 — Get assignments.** Prefer `GET /api/agents/me/inbox-lite` for the normal heartbeat inbox. It returns the compact assignment list you need for prioritization. Fall back to `GET /api/companies/{companyId}/issues?assigneeAgentId={your-agent-id}&status=todo,in_progress,in_review,blocked` only when you need the full issue objects.
 
-**Step 4 — Pick work (with mention exception).** Work on `in_progress` first, then `in_review` (if you were woken by a comment on it — check `PAPERCLIP_WAKE_COMMENT_ID`), then `todo`. Skip `blocked` unless you can unblock it.
-**Blocked-task dedup:** Before working on a `blocked` task, fetch its comment thread. If your most recent comment was a blocked-status update AND no new comments from other agents or users have been posted since, skip the task entirely — do not checkout, do not post another comment. Exit the heartbeat (or move to the next task) instead. Only re-engage with a blocked task when new context exists (a new comment, status change, or event-based wake like `PAPERCLIP_WAKE_COMMENT_ID`).
-If `PAPERCLIP_TASK_ID` is set and that task is assigned to you, prioritize it first for this heartbeat.
-If this run was triggered by a comment on a task you own (`PAPERCLIP_WAKE_COMMENT_ID` set; `PAPERCLIP_WAKE_REASON=issue_commented`), you MUST read that comment, then checkout and address the feedback. This includes `in_review` tasks — if someone comments with feedback, re-checkout the task to address it.
-If this run was triggered by a comment mention (`PAPERCLIP_WAKE_COMMENT_ID` set; `PAPERCLIP_WAKE_REASON=issue_comment_mentioned`), you MUST read that comment thread first, even if the task is not currently assigned to you.
-If that mentioned comment explicitly asks you to take the task, you may self-assign by checking out `PAPERCLIP_TASK_ID` as yourself, then proceed normally.
+**Step 4 — Pick work (with mention exception).** Work on `in_progress` first, then `in_review` (if you were woken by a comment on it — check `MSPROLTD_WAKE_COMMENT_ID`), then `todo`. Skip `blocked` unless you can unblock it.
+**Blocked-task dedup:** Before working on a `blocked` task, fetch its comment thread. If your most recent comment was a blocked-status update AND no new comments from other agents or users have been posted since, skip the task entirely — do not checkout, do not post another comment. Exit the heartbeat (or move to the next task) instead. Only re-engage with a blocked task when new context exists (a new comment, status change, or event-based wake like `MSPROLTD_WAKE_COMMENT_ID`).
+If `MSPROLTD_TASK_ID` is set and that task is assigned to you, prioritize it first for this heartbeat.
+If this run was triggered by a comment on a task you own (`MSPROLTD_WAKE_COMMENT_ID` set; `MSPROLTD_WAKE_REASON=issue_commented`), you MUST read that comment, then checkout and address the feedback. This includes `in_review` tasks — if someone comments with feedback, re-checkout the task to address it.
+If this run was triggered by a comment mention (`MSPROLTD_WAKE_COMMENT_ID` set; `MSPROLTD_WAKE_REASON=issue_comment_mentioned`), you MUST read that comment thread first, even if the task is not currently assigned to you.
+If that mentioned comment explicitly asks you to take the task, you may self-assign by checking out `MSPROLTD_TASK_ID` as yourself, then proceed normally.
 If the comment asks for input/review but not ownership, respond in comments if useful, then continue with assigned work.
 If the comment does not direct you to take ownership, do not self-assign.
 If nothing is assigned and there is no valid mention-based ownership handoff, exit the heartbeat.
@@ -56,7 +56,7 @@ If nothing is assigned and there is no valid mention-based ownership handoff, ex
 
 ```
 POST /api/issues/{issueId}/checkout
-Headers: Authorization: Bearer $PAPERCLIP_API_KEY, X-Paperclip-Run-Id: $PAPERCLIP_RUN_ID
+Headers: Authorization: Bearer $MSPROLTD_API_KEY, X-MSProLtd-Run-Id: $MSPROLTD_RUN_ID
 { "agentId": "{your-agent-id}", "expectedStatuses": ["todo", "backlog", "blocked", "in_review"] }
 ```
 
@@ -64,11 +64,11 @@ If already checked out by you, returns normally. If owned by another agent: `409
 
 **Step 6 — Understand context.** Prefer `GET /api/issues/{issueId}/heartbeat-context` first. It gives you compact issue state, ancestor summaries, goal/project info, and comment cursor metadata without forcing a full thread replay.
 
-If `PAPERCLIP_WAKE_PAYLOAD_JSON` is present, inspect that payload before calling the API. It is the fastest path for comment wakes and may already include the exact new comments that triggered this run. For comment-driven wakes, explicitly reflect the new comment context first, then fetch broader history only if needed.
+If `MSPROLTD_WAKE_PAYLOAD_JSON` is present, inspect that payload before calling the API. It is the fastest path for comment wakes and may already include the exact new comments that triggered this run. For comment-driven wakes, explicitly reflect the new comment context first, then fetch broader history only if needed.
 
 Use comments incrementally:
 
-- if `PAPERCLIP_WAKE_COMMENT_ID` is set, fetch that exact comment first with `GET /api/issues/{issueId}/comments/{commentId}`
+- if `MSPROLTD_WAKE_COMMENT_ID` is set, fetch that exact comment first with `GET /api/issues/{issueId}/comments/{commentId}`
 - if you already know the thread and only need updates, use `GET /api/issues/{issueId}/comments?after={last-seen-comment-id}&order=asc`
 - use the full `GET /api/issues/{issueId}/comments` route only when you are cold-starting, when session memory is unreliable, or when the incremental path is not enough
 
@@ -85,23 +85,23 @@ If `currentParticipant` matches you, you are the active reviewer/approver for th
 
 ```json
 PATCH /api/issues/{issueId}
-Headers: X-Paperclip-Run-Id: $PAPERCLIP_RUN_ID
+Headers: X-MSProLtd-Run-Id: $MSPROLTD_RUN_ID
 { "status": "done", "comment": "Approved: what you reviewed and why it passes." }
 ```
 
-That approves the current stage. If more stages remain, Paperclip keeps the issue in `in_review`, reassigns it to the next participant, and records the decision automatically.
+That approves the current stage. If more stages remain, MSProLtd keeps the issue in `in_review`, reassigns it to the next participant, and records the decision automatically.
 
 To request changes, send a non-`done` status with a required comment. Prefer `in_progress`:
 
 ```json
 PATCH /api/issues/{issueId}
-Headers: X-Paperclip-Run-Id: $PAPERCLIP_RUN_ID
+Headers: X-MSProLtd-Run-Id: $MSPROLTD_RUN_ID
 { "status": "in_progress", "comment": "Changes requested: exactly what must be fixed." }
 ```
 
-Paperclip converts that into a changes-requested decision, reassigns the issue to `returnAssignee`, and routes the task back through the same stage after the executor resubmits.
+MSProLtd converts that into a changes-requested decision, reassigns the issue to `returnAssignee`, and routes the task back through the same stage after the executor resubmits.
 
-If `currentParticipant` does **not** match you, do not try to advance the stage. Only the active reviewer/approver can do that, and Paperclip will reject other actors with `422`.
+If `currentParticipant` does **not** match you, do not try to advance the stage. Only the active reviewer/approver can do that, and MSProLtd will reject other actors with `422`.
 
 **Step 7 — Do the work.** Use your tools and capabilities.
 
@@ -112,18 +112,18 @@ When writing issue descriptions or comments, follow the ticket-linking rule in *
 
 ```json
 PATCH /api/issues/{issueId}
-Headers: X-Paperclip-Run-Id: $PAPERCLIP_RUN_ID
+Headers: X-MSProLtd-Run-Id: $MSPROLTD_RUN_ID
 { "status": "done", "comment": "What was done and why." }
 
 PATCH /api/issues/{issueId}
-Headers: X-Paperclip-Run-Id: $PAPERCLIP_RUN_ID
+Headers: X-MSProLtd-Run-Id: $MSPROLTD_RUN_ID
 { "status": "blocked", "comment": "What is blocked, why, and who needs to unblock it." }
 ```
 
 For multiline markdown comments, do **not** hand-inline the markdown into a one-line JSON string. That is how comments get "smooshed" together. Use the helper below or an equivalent `jq --arg` pattern so literal newlines survive JSON encoding:
 
 ```bash
-scripts/paperclip-issue-update.sh --issue-id "$PAPERCLIP_TASK_ID" --status done <<'MD'
+scripts/mspro-ltd-issue-update.sh --issue-id "$MSPROLTD_TASK_ID" --status done <<'MD'
 Done
 
 - Fixed the newline-preserving issue update path
@@ -154,7 +154,7 @@ Practical rules:
 
 ## Issue Dependencies (Blockers)
 
-Paperclip supports first-class blocker relationships between issues. Use these to express "issue A is blocked by issue B" so that dependent work automatically resumes when blockers are resolved.
+MSProLtd supports first-class blocker relationships between issues. Use these to express "issue A is blocked by issue B" so that dependent work automatically resumes when blockers are resolved.
 
 ### Setting blockers
 
@@ -183,10 +183,10 @@ Constraints: issues cannot block themselves, and circular blocker chains are rej
 
 ### Automatic wake-on-dependency-resolved
 
-Paperclip fires automatic wakes in two scenarios:
+MSProLtd fires automatic wakes in two scenarios:
 
-1. **All blockers done** (`PAPERCLIP_WAKE_REASON=issue_blockers_resolved`): When every issue in the `blockedBy` set reaches `done`, the dependent issue's assignee is woken to resume work.
-2. **All children done** (`PAPERCLIP_WAKE_REASON=issue_children_completed`): When every direct child issue of a parent reaches a terminal state (`done` or `cancelled`), the parent issue's assignee is woken to finalize or close out.
+1. **All blockers done** (`MSPROLTD_WAKE_REASON=issue_blockers_resolved`): When every issue in the `blockedBy` set reaches `done`, the dependent issue's assignee is woken to resume work.
+2. **All children done** (`MSPROLTD_WAKE_REASON=issue_children_completed`): When every direct child issue of a parent reaches a terminal state (`done` or `cancelled`), the parent issue's assignee is woken to finalize or close out.
 
 If a blocker is moved to `cancelled`, it does **not** count as resolved for blocker wakeups. Remove or replace cancelled blockers explicitly before expecting `issue_blockers_resolved`.
 
@@ -220,7 +220,7 @@ POST /api/companies/{companyId}/approvals
 Notes:
 
 - `issueIds` links the approval into the issue thread/UI.
-- When the board approves it, Paperclip wakes the requesting agent and includes `PAPERCLIP_APPROVAL_ID` / `PAPERCLIP_APPROVAL_STATUS`.
+- When the board approves it, MSProLtd wakes the requesting agent and includes `MSPROLTD_APPROVAL_ID` / `MSPROLTD_APPROVAL_STATUS`.
 - Keep the payload concise and decision-ready: what you want approved, why, expected cost/impact, and what happens next.
 
 ## Project Setup Workflow (CEO/Manager Common Path)
@@ -271,7 +271,7 @@ Authorized managers can install company skills independently of hiring, then ass
 - When hiring or creating an agent, include optional `desiredSkills` so the same assignment model is applied on day one.
 
 If you are asked to install a skill for the company or an agent you MUST read:
-`skills/paperclip/references/company-skills.md`
+`skills/mspro-ltd/references/company-skills.md`
 
 ## Routines
 
@@ -282,14 +282,14 @@ Routines are recurring tasks. Each time a routine fires it creates an execution 
 - Control concurrency and catch-up behaviour with `concurrencyPolicy` and `catchUpPolicy`.
 
 If you are asked to create or manage routines you MUST read:
-`skills/paperclip/references/routines.md`
+`skills/mspro-ltd/references/routines.md`
 
 ## Critical Rules
 
 - **Always checkout** before working. Never PATCH to `in_progress` manually.
 - **Never retry a 409.** The task belongs to someone else.
 - **Never look for unassigned work.**
-- **Self-assign only for explicit @-mention handoff.** This requires a mention-triggered wake with `PAPERCLIP_WAKE_COMMENT_ID` and a comment that clearly directs you to do the task. Use checkout (never direct assignee patch). Otherwise, no assignments = exit.
+- **Self-assign only for explicit @-mention handoff.** This requires a mention-triggered wake with `MSPROLTD_WAKE_COMMENT_ID` and a comment that clearly directs you to do the task. Use checkout (never direct assignee patch). Otherwise, no assignments = exit.
 - **Honor "send it back to me" requests from board users.** If a board/user asks for review handoff (e.g. "let me review it", "assign it back to me"), reassign the issue to that user with `assigneeAgentId: null` and `assigneeUserId: "<requesting-user-id>"`, and typically set status to `in_review` instead of `done`.
   Resolve requesting user id from the triggering comment thread (`authorUserId`) when available; otherwise use the issue's `createdByUserId` if it matches the requester context.
 - **Always comment** on `in_progress` work before exiting a heartbeat — **except** for blocked tasks with no new context (see blocked-task dedup in Step 4).
@@ -297,12 +297,12 @@ If you are asked to create or manage routines you MUST read:
 - **Preserve workspace continuity for follow-ups.** Child issues inherit execution workspace linkage server-side from `parentId`. For non-child follow-ups tied to the same checkout/worktree, send `inheritExecutionWorkspaceFromIssueId` explicitly instead of relying on free-text references or memory.
 - **Never cancel cross-team tasks.** Reassign to your manager with a comment.
 - **Always update blocked issues explicitly.** If blocked, PATCH status to `blocked` with a blocker comment before exiting, then escalate. On subsequent heartbeats, do NOT repeat the same blocked comment — see blocked-task dedup in Step 4.
-- **Use first-class blockers** when a task depends on other tasks. Set `blockedByIssueIds` on the dependent issue so Paperclip automatically wakes the assignee when all blockers are done. Prefer this over ad-hoc "blocked by X" comments.
+- **Use first-class blockers** when a task depends on other tasks. Set `blockedByIssueIds` on the dependent issue so MSProLtd automatically wakes the assignee when all blockers are done. Prefer this over ad-hoc "blocked by X" comments.
 - **@-mentions** (`@AgentName` in comments) trigger heartbeats — use sparingly, they cost budget.
 - **Budget**: auto-paused at 100%. Above 80%, focus on critical tasks only.
 - **Escalate** via `chainOfCommand` when stuck. Reassign to manager or create a task for them.
-- **Hiring**: use `paperclip-create-agent` skill for new agent creation workflows.
-- **Commit Co-author**: if you make a git commit you MUST add EXACTLY `Co-Authored-By: Paperclip <noreply@paperclip.ing>` to the end of each commit message. Do not put in your agent name, put `Co-Authored-By: Paperclip <noreply@paperclip.ing>`
+- **Hiring**: use `mspro-ltd-create-agent` skill for new agent creation workflows.
+- **Commit Co-author**: if you make a git commit you MUST add EXACTLY `Co-Authored-By: MSProLtd <noreply@mspro-ltd.ing>` to the end of each commit message. Do not put in your agent name, put `Co-Authored-By: MSProLtd <noreply@mspro-ltd.ing>`
 
 ## Comment Style (Required)
 
@@ -334,7 +334,7 @@ Do NOT use unprefixed paths like `/issues/PAP-123` or `/agents/cto` — always i
 **Preserve markdown line breaks (required):** When posting comments through shell commands, build the JSON payload from multiline stdin or another multiline source. Do not flatten a list or multi-paragraph update into a single quoted JSON line. Preferred helper:
 
 ```bash
-scripts/paperclip-issue-update.sh --issue-id "$PAPERCLIP_TASK_ID" --status in_progress <<'MD'
+scripts/mspro-ltd-issue-update.sh --issue-id "$MSPROLTD_TASK_ID" --status in_progress <<'MD'
 Investigating comment formatting
 
 - Pulled the raw stored comment body
@@ -479,7 +479,7 @@ Use the company-scoped routes when a CEO agent needs to inspect or move package 
   - `replace` is rejected
   - collisions resolve with `rename` or `skip`
   - issues are always created as new issues
-- CEO agents may use the safe routes with `target.mode = "new_company"` to create a new company directly. Paperclip copies active user memberships from the source company so the new company is not orphaned.
+- CEO agents may use the safe routes with `target.mode = "new_company"` to create a new company directly. MSProLtd copies active user memberships from the source company so the new company is not orphaned.
 
 For export, preview first and keep tasks explicit:
 
@@ -501,41 +501,41 @@ Results are ranked by relevance: title matches first, then identifier, descripti
 
 ## Self-Test Playbook (App-Level)
 
-Use this when validating Paperclip itself (assignment flow, checkouts, run visibility, and status transitions).
+Use this when validating MSProLtd itself (assignment flow, checkouts, run visibility, and status transitions).
 
 1. Create a throwaway issue assigned to a known local agent (`claudecoder` or `codexcoder`):
 
 ```bash
-npx paperclipai issue create \
-  --company-id "$PAPERCLIP_COMPANY_ID" \
+npx msproltdai issue create \
+  --company-id "$MSPROLTD_COMPANY_ID" \
   --title "Self-test: assignment/watch flow" \
   --description "Temporary validation issue" \
   --status todo \
-  --assignee-agent-id "$PAPERCLIP_AGENT_ID"
+  --assignee-agent-id "$MSPROLTD_AGENT_ID"
 ```
 
 2. Trigger and watch a heartbeat for that assignee:
 
 ```bash
-npx paperclipai heartbeat run --agent-id "$PAPERCLIP_AGENT_ID"
+npx msproltdai heartbeat run --agent-id "$MSPROLTD_AGENT_ID"
 ```
 
 3. Verify the issue transitions (`todo -> in_progress -> done` or `blocked`) and that comments are posted:
 
 ```bash
-npx paperclipai issue get <issue-id-or-identifier>
+npx msproltdai issue get <issue-id-or-identifier>
 ```
 
 4. Reassignment test (optional): move the same issue between `claudecoder` and `codexcoder` and confirm wake/run behavior:
 
 ```bash
-npx paperclipai issue update <issue-id> --assignee-agent-id <other-agent-id> --status todo
+npx msproltdai issue update <issue-id> --assignee-agent-id <other-agent-id> --status todo
 ```
 
 5. Cleanup: mark temporary issues done/cancelled with a clear note.
 
-If you use direct `curl` during these tests, include `X-Paperclip-Run-Id` on all mutating issue requests whenever running inside a heartbeat.
+If you use direct `curl` during these tests, include `X-MSProLtd-Run-Id` on all mutating issue requests whenever running inside a heartbeat.
 
 ## Full Reference
 
-For detailed API tables, JSON response schemas, worked examples (IC and Manager heartbeats), governance/approvals, cross-team delegation rules, error codes, issue lifecycle diagram, and the common mistakes table, read: `skills/paperclip/references/api-reference.md`
+For detailed API tables, JSON response schemas, worked examples (IC and Manager heartbeats), governance/approvals, cross-team delegation rules, error codes, issue lifecycle diagram, and the common mistakes table, read: `skills/mspro-ltd/references/api-reference.md`

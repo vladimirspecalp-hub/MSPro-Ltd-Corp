@@ -3,7 +3,7 @@ import { existsSync, mkdirSync } from 'fs';
 import { join } from 'path';
 import { pathToFileURL } from 'url';
 
-const BASE = 'C:/CODE/Paperclip-MSPRO-org/departments/website/posts/designer/vault/concepts/calculator-2026-04';
+const BASE = 'C:/CODE/MSProLtd-MSPRO-org/departments/website/posts/designer/vault/concepts/calculator-2026-04';
 
 const concepts = [
   { name: 'concept-A' },

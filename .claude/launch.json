@@ -4,7 +4,7 @@
     {
       "name": "ui",
       "runtimeExecutable": "pnpm",
-      "runtimeArgs": ["--filter", "@paperclipai/ui", "dev"],
+      "runtimeArgs": ["--filter", "@msproltd/ui", "dev"],
       "port": 5173
     }
   ]

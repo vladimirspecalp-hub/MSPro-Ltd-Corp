@@ -5,13 +5,13 @@ import type {
   AdapterEnvironmentTestResult,
   CompanySecret,
   EnvBinding,
-} from "@paperclipai/shared";
+} from "@msproltd/shared";
 import type { AdapterModel } from "../api/agents";
 import { agentsApi } from "../api/agents";
 import { secretsApi } from "../api/secrets";
 import { assetsApi } from "../api/assets";
 // MSPRO fork: импорты удалённых adapters (codex, gemini) убраны
-import { DEFAULT_CURSOR_LOCAL_MODEL } from "@paperclipai/adapter-cursor-local";
+import { DEFAULT_CURSOR_LOCAL_MODEL } from "@msproltd/adapter-cursor-local";
 import {
   Popover,
   PopoverContent,
@@ -50,10 +50,10 @@ import { useAdapterCapabilities } from "../adapters/use-adapter-capabilities";
 
 /* ---- Create mode values ---- */
 
-// Canonical type lives in @paperclipai/adapter-utils; re-exported here
+// Canonical type lives in @msproltd/adapter-utils; re-exported here
 // so existing imports from this file keep working.
-export type { CreateConfigValues } from "@paperclipai/adapter-utils";
-import type { CreateConfigValues } from "@paperclipai/adapter-utils";
+export type { CreateConfigValues } from "@msproltd/adapter-utils";
+import type { CreateConfigValues } from "@msproltd/adapter-utils";
 
 /* ---- Props ---- */
 

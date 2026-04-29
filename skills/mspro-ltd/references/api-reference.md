@@ -1,6 +1,6 @@
-# Paperclip API Reference
+# MSProLtd API Reference
 
-Detailed reference for the Paperclip control plane API. For the core heartbeat procedure and critical rules, see the main `SKILL.md`.
+Detailed reference for the MSProLtd control plane API. For the core heartbeat procedure and critical rules, see the main `SKILL.md`.
 
 ---
 
@@ -99,7 +99,7 @@ POST /api/companies/company-1/exports
   "selectedFiles": [
     "COMPANY.md",
     "agents/ceo/AGENTS.md",
-    "skills/paperclip/SKILL.md",
+    "skills/mspro-ltd/SKILL.md",
     "tasks/pap-42/TASK.md"
   ]
 }
@@ -241,7 +241,7 @@ Interpretation:
 - `returnAssignee` is who gets the task back when changes are requested
 - `lastDecisionOutcome` shows the latest gate decision
 
-There is **no separate execution-decision endpoint**. Review and approval decisions are submitted through `PATCH /api/issues/:issueId`, and Paperclip records the decision row automatically.
+There is **no separate execution-decision endpoint**. Review and approval decisions are submitted through `PATCH /api/issues/:issueId`, and MSProLtd records the decision row automatically.
 
 ---
 
@@ -340,7 +340,7 @@ PATCH /api/issues/issue-77
 { "status": "done", "comment": "QA signoff complete. Verified the regression and test coverage." }
 ```
 
-Paperclip writes the execution decision automatically. If another stage remains, the issue stays in `in_review` and is reassigned to the next participant. If this was the final stage, the issue reaches actual `done`.
+MSProLtd writes the execution decision automatically. If another stage remains, the issue stays in `in_review` and is reassigned to the next participant. If this was the final stage, the issue reaches actual `done`.
 
 To request changes, use a non-`done` status with a required comment. Prefer `in_progress`:
 
@@ -349,7 +349,7 @@ PATCH /api/issues/issue-77
 { "status": "in_progress", "comment": "Changes requested: add a regression test for the empty-state path." }
 ```
 
-Paperclip converts that into a `changes_requested` decision, reassigns the issue to `returnAssignee`, and routes it back to the same stage when the executor resubmits.
+MSProLtd converts that into a `changes_requested` decision, reassigns the issue to `returnAssignee`, and routes it back to the same stage when the executor resubmits.
 
 ---
 
@@ -388,7 +388,7 @@ POST /api/companies/company-1/issues
 
 POST /api/companies/company-1/issues
 { "title": "Write load test suite", "assigneeAgentId": "agent-55", "parentId": "issue-30", "status": "blocked", "priority": "medium", "goalId": "goal-1", "blockedByIssueIds": ["<caching-layer-issue-id>"] }
-# ^ Load tests depend on caching layer being done first. Paperclip will auto-wake agent-55 when the blocker resolves.
+# ^ Load tests depend on caching layer being done first. MSProLtd will auto-wake agent-55 when the blocker resolves.
 
 PATCH /api/issues/issue-30
 { "status": "done", "comment": "Broke down into subtasks for caching layer and load testing." }
@@ -553,14 +553,14 @@ When a CEO/manager task asks you to "set up a new project" and wire local + GitH
 ```
 POST /api/companies/{companyId}/projects
 {
-  "name": "Paperclip Mobile App",
+  "name": "MSProLtd Mobile App",
   "description": "Ship iOS + Android client",
   "status": "planned",
   "goalIds": ["{goalId}"],
   "workspace": {
-    "name": "paperclip-mobile",
-    "cwd": "/Users/me/paperclip-mobile",
-    "repoUrl": "https://github.com/acme/paperclip-mobile",
+    "name": "mspro-ltd-mobile",
+    "cwd": "/Users/me/mspro-ltd-mobile",
+    "repoUrl": "https://github.com/acme/mspro-ltd-mobile",
     "repoRef": "main",
     "isPrimary": true
   }
@@ -572,15 +572,15 @@ POST /api/companies/{companyId}/projects
 ```
 POST /api/companies/{companyId}/projects
 {
-  "name": "Paperclip Mobile App",
+  "name": "MSProLtd Mobile App",
   "description": "Ship iOS + Android client",
   "status": "planned"
 }
 
 POST /api/projects/{projectId}/workspaces
 {
-  "cwd": "/Users/me/paperclip-mobile",
-  "repoUrl": "https://github.com/acme/paperclip-mobile",
+  "cwd": "/Users/me/mspro-ltd-mobile",
+  "repoUrl": "https://github.com/acme/mspro-ltd-mobile",
   "repoRef": "main",
   "isPrimary": true
 }
@@ -618,7 +618,7 @@ If company policy requires approval, the new agent is created as `pending_approv
 **Do NOT** request hires unless you are a manager or CEO. IC agents should ask their manager.
 Leave timer heartbeats off by default for new hires. Only enable a scheduled heartbeat when the role truly needs recurring timed work or the user explicitly asked for one.
 
-Use `paperclip-create-agent` for the full hiring workflow (reflection + config comparison + prompt drafting).
+Use `mspro-ltd-create-agent` for the full hiring workflow (reflection + config comparison + prompt drafting).
 
 ### CEO strategy approval
 
@@ -638,9 +638,9 @@ GET /api/companies/{companyId}/approvals?status=pending
 ### Approval follow-up (requesting agent)
 
 When board resolves your approval, you may be woken with:
-- `PAPERCLIP_APPROVAL_ID`
-- `PAPERCLIP_APPROVAL_STATUS`
-- `PAPERCLIP_LINKED_ISSUE_IDS`
+- `MSPROLTD_APPROVAL_ID`
+- `MSPROLTD_APPROVAL_STATUS`
+- `MSPROLTD_LINKED_ISSUE_IDS`
 
 Use:
 
@@ -826,4 +826,4 @@ Terminal states: `done`, `cancelled`
 | @-mention agents for no reason              | Each mention triggers a budget-consuming heartbeat    | Only mention agents who need to act                     |
 | Sit silently on blocked work                | Nobody knows you're stuck; the task rots              | Comment the blocker and escalate immediately            |
 | Leave tasks in ambiguous states             | Others can't tell if work is progressing              | Always update status: `blocked`, `in_review`, or `done` |
-| Block on another task without `blockedByIssueIds` | No automatic wake when blocker resolves; manual follow-up needed | Set `blockedByIssueIds` so Paperclip auto-wakes the assignee when all blockers are done |
+| Block on another task without `blockedByIssueIds` | No automatic wake when blocker resolves; manual follow-up needed | Set `blockedByIssueIds` so MSProLtd auto-wakes the assignee when all blockers are done |

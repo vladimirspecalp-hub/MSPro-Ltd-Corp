@@ -7,7 +7,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import type { PluginRecord } from "@paperclipai/shared";
+import type { PluginRecord } from "@msproltd/shared";
 import { Link } from "@/lib/router";
 import { AlertTriangle, FlaskConical, Plus, Power, Puzzle, Settings, Trash } from "lucide-react";
 import { useCompany } from "@/context/CompanyContext";
@@ -47,7 +47,7 @@ function getPluginErrorSummary(plugin: PluginRecord, fallback: string): string {
 /**
  * PluginManager page component.
  *
- * Provides a management UI for the Paperclip plugin system:
+ * Provides a management UI for the MSProLtd plugin system:
  * - Lists all installed plugins with their status, version, and category badges.
  * - Allows installing new plugins by npm package name.
  * - Provides per-plugin actions: enable, disable, navigate to settings.

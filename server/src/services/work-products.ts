@@ -1,7 +1,7 @@
 import { and, desc, eq } from "drizzle-orm";
-import type { Db } from "@paperclipai/db";
-import { issueWorkProducts } from "@paperclipai/db";
-import type { IssueWorkProduct } from "@paperclipai/shared";
+import type { Db } from "@msproltd/db";
+import { issueWorkProducts } from "@msproltd/db";
+import type { IssueWorkProduct } from "@msproltd/shared";
 
 type IssueWorkProductRow = typeof issueWorkProducts.$inferSelect;
 

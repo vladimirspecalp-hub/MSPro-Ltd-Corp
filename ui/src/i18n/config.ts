@@ -5,13 +5,13 @@ import ru from "./locales/ru.json";
 import en from "./locales/en.json";
 
 /**
- * i18n configuration for paperclip-mspro UI.
+ * i18n configuration for mspro-ltd-mspro UI.
  *
  * Phase A: navigation, sidebar, common buttons, app chrome — done.
  * Phase B: page-by-page translation of 46 pages — in progress.
  *
  * Default locale: Russian (this is an internal MSPRO tool).
- * Fallback: English (original paperclip strings).
+ * Fallback: English (original mspro-ltd strings).
  *
  * Usage in components:
  *   import { useTranslation } from "react-i18next";

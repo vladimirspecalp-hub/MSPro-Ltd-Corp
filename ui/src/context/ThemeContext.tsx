@@ -17,7 +17,7 @@ interface ThemeContextValue {
 }
 
 const THEME_STORAGE_KEY = "mspro.theme";
-const THEME_STORAGE_KEY_OLD = "paperclip.theme";
+const THEME_STORAGE_KEY_OLD = "mspro-ltd.theme";
 const DARK_THEME_COLOR = "#18181b";
 const LIGHT_THEME_COLOR = "#ffffff";
 const ThemeContext = createContext<ThemeContextValue | undefined>(undefined);

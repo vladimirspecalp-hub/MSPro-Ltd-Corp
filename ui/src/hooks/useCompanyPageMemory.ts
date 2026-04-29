@@ -9,7 +9,7 @@ import {
 } from "../lib/company-page-memory";
 
 const STORAGE_KEY = "mspro.companyPaths";
-const STORAGE_KEY_OLD = "paperclip.companyPaths";
+const STORAGE_KEY_OLD = "mspro-ltd.companyPaths";
 
 function getCompanyPaths(): Record<string, string> {
   try {

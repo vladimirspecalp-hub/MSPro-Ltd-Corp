@@ -10,9 +10,9 @@ describe("log redaction", () => {
     const userName = "paperclipuser";
     const maskedUserName = maskUserNameForLogs(userName);
     const input = [
-      `cwd=/Users/${userName}/paperclip`,
+      `cwd=/Users/${userName}/mspro-ltd`,
       `home=/home/${userName}/workspace`,
-      `win=C:\\Users\\${userName}\\paperclip`,
+      `win=C:\\Users\\${userName}\\mspro-ltd`,
     ].join("\n");
 
     const result = redactCurrentUserText(input, {
@@ -20,9 +20,9 @@ describe("log redaction", () => {
       homeDirs: [`/Users/${userName}`, `/home/${userName}`, `C:\\Users\\${userName}`],
     });
 
-    expect(result).toContain(`cwd=/Users/${maskedUserName}/paperclip`);
+    expect(result).toContain(`cwd=/Users/${maskedUserName}/mspro-ltd`);
     expect(result).toContain(`home=/home/${maskedUserName}/workspace`);
-    expect(result).toContain(`win=C:\\Users\\${maskedUserName}\\paperclip`);
+    expect(result).toContain(`win=C:\\Users\\${maskedUserName}\\mspro-ltd`);
     expect(result).not.toContain(userName);
   });
 
@@ -46,8 +46,8 @@ describe("log redaction", () => {
     const userName = "paperclipuser";
     const maskedUserName = maskUserNameForLogs(userName);
     const result = redactCurrentUserValue({
-      cwd: `/Users/${userName}/paperclip`,
-      prompt: `open /Users/${userName}/paperclip/ui`,
+      cwd: `/Users/${userName}/mspro-ltd`,
+      prompt: `open /Users/${userName}/mspro-ltd/ui`,
       nested: {
         author: userName,
       },
@@ -58,8 +58,8 @@ describe("log redaction", () => {
     });
 
     expect(result).toEqual({
-      cwd: `/Users/${maskedUserName}/paperclip`,
-      prompt: `open /Users/${maskedUserName}/paperclip/ui`,
+      cwd: `/Users/${maskedUserName}/mspro-ltd`,
+      prompt: `open /Users/${maskedUserName}/mspro-ltd/ui`,
       nested: {
         author: maskedUserName,
       },
@@ -68,7 +68,7 @@ describe("log redaction", () => {
   });
 
   it("skips redaction when disabled", () => {
-    const input = "cwd=/Users/paperclipuser/paperclip";
+    const input = "cwd=/Users/paperclipuser/mspro-ltd";
     expect(redactCurrentUserText(input, { enabled: false })).toBe(input);
   });
 });

@@ -12,7 +12,7 @@ import {
   issueExecutionDecisions,
   issueReadStates,
   issues,
-} from "@paperclipai/db";
+} from "@msproltd/db";
 import {
   getEmbeddedPostgresTestSupport,
   startEmbeddedPostgresTestDatabase,
@@ -34,7 +34,7 @@ describeEmbeddedPostgres("cleanup removal services", () => {
   let tempDb: Awaited<ReturnType<typeof startEmbeddedPostgresTestDatabase>> | null = null;
 
   beforeAll(async () => {
-    tempDb = await startEmbeddedPostgresTestDatabase("paperclip-cleanup-removal-");
+    tempDb = await startEmbeddedPostgresTestDatabase("mspro-ltd-cleanup-removal-");
     db = createDb(tempDb.connectionString);
   }, 20_000);
 
@@ -63,7 +63,7 @@ describeEmbeddedPostgres("cleanup removal services", () => {
 
     await db.insert(companies).values({
       id: companyId,
-      name: "Paperclip",
+      name: "MSProLtd",
       issuePrefix,
       requireBoardApprovalForNewAgents: false,
     });
@@ -159,10 +159,10 @@ describeEmbeddedPostgres("cleanup removal services", () => {
     await db.insert(companySkills).values({
       id: randomUUID(),
       companyId,
-      key: "paperclipai/paperclip/paperclip",
-      slug: "paperclip",
-      name: "Paperclip",
-      markdown: "# Paperclip",
+      key: "msproltdai/mspro-ltd/mspro-ltd",
+      slug: "mspro-ltd",
+      name: "MSProLtd",
+      markdown: "# MSProLtd",
     });
 
     await db.insert(activityLog).values({

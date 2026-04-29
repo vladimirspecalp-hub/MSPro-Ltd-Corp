@@ -60,11 +60,11 @@ function BootstrapPendingPage({ hasActiveInvite = false }: { hasActiveInvite?: b
         <h1 className="text-xl font-semibold">{t("instance.setup_required")}</h1>
         <p className="mt-2 text-sm text-muted-foreground">
           {hasActiveInvite
-            ? "No instance admin exists yet. A bootstrap invite is already active. Check your Paperclip startup logs for the first admin invite URL, or run this command to rotate it:"
+            ? "No instance admin exists yet. A bootstrap invite is already active. Check your MSProLtd startup logs for the first admin invite URL, or run this command to rotate it:"
             : t("instance.no_admin")}
         </p>
         <pre className="mt-4 overflow-x-auto rounded-md border border-border bg-muted/30 p-3 text-xs">
-{`pnpm paperclipai auth bootstrap-ceo`}
+{`pnpm msproltdai auth bootstrap-ceo`}
         </pre>
       </div>
     </div>

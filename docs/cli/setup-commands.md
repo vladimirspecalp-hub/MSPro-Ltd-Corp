@@ -5,35 +5,35 @@ summary: Onboard, run, doctor, and configure
 
 Instance setup and diagnostics commands.
 
-## `paperclipai run`
+## `msproltdai run`
 
 One-command bootstrap and start:
 
 ```sh
-pnpm paperclipai run
+pnpm msproltdai run
 ```
 
 Does:
 
 1. Auto-onboards if config is missing
-2. Runs `paperclipai doctor` with repair enabled
+2. Runs `msproltdai doctor` with repair enabled
 3. Starts the server when checks pass
 
 Choose a specific instance:
 
 ```sh
-pnpm paperclipai run --instance dev
+pnpm msproltdai run --instance dev
 ```
 
-## `paperclipai onboard`
+## `msproltdai onboard`
 
 Interactive first-time setup:
 
 ```sh
-pnpm paperclipai onboard
+pnpm msproltdai onboard
 ```
 
-If Paperclip is already configured, rerunning `onboard` keeps the existing config in place. Use `paperclipai configure` to change settings on an existing install.
+If MSProLtd is already configured, rerunning `onboard` keeps the existing config in place. Use `msproltdai configure` to change settings on an existing install.
 
 First prompt:
 
@@ -43,24 +43,24 @@ First prompt:
 Start immediately after onboarding:
 
 ```sh
-pnpm paperclipai onboard --run
+pnpm msproltdai onboard --run
 ```
 
 Non-interactive defaults + immediate start (opens browser on server listen):
 
 ```sh
-pnpm paperclipai onboard --yes
+pnpm msproltdai onboard --yes
 ```
 
-On an existing install, `--yes` now preserves the current config and just starts Paperclip with that setup.
+On an existing install, `--yes` now preserves the current config and just starts MSProLtd with that setup.
 
-## `paperclipai doctor`
+## `msproltdai doctor`
 
 Health checks with optional auto-repair:
 
 ```sh
-pnpm paperclipai doctor
-pnpm paperclipai doctor --repair
+pnpm msproltdai doctor
+pnpm msproltdai doctor --repair
 ```
 
 Validates:
@@ -71,53 +71,53 @@ Validates:
 - Storage configuration
 - Missing key files
 
-## `paperclipai configure`
+## `msproltdai configure`
 
 Update configuration sections:
 
 ```sh
-pnpm paperclipai configure --section server
-pnpm paperclipai configure --section secrets
-pnpm paperclipai configure --section storage
+pnpm msproltdai configure --section server
+pnpm msproltdai configure --section secrets
+pnpm msproltdai configure --section storage
 ```
 
-## `paperclipai env`
+## `msproltdai env`
 
 Show resolved environment configuration:
 
 ```sh
-pnpm paperclipai env
+pnpm msproltdai env
 ```
 
-This now includes bind-oriented deployment settings such as `PAPERCLIP_BIND` and `PAPERCLIP_BIND_HOST` when configured.
+This now includes bind-oriented deployment settings such as `MSPROLTD_BIND` and `MSPROLTD_BIND_HOST` when configured.
 
-## `paperclipai allowed-hostname`
+## `msproltdai allowed-hostname`
 
 Allow a private hostname for authenticated/private mode:
 
 ```sh
-pnpm paperclipai allowed-hostname my-tailscale-host
+pnpm msproltdai allowed-hostname my-tailscale-host
 ```
 
 ## Local Storage Paths
 
 | Data | Default Path |
 |------|-------------|
-| Config | `~/.paperclip/instances/default/config.json` |
-| Database | `~/.paperclip/instances/default/db` |
-| Logs | `~/.paperclip/instances/default/logs` |
-| Storage | `~/.paperclip/instances/default/data/storage` |
-| Secrets key | `~/.paperclip/instances/default/secrets/master.key` |
+| Config | `~/.mspro-ltd/instances/default/config.json` |
+| Database | `~/.mspro-ltd/instances/default/db` |
+| Logs | `~/.mspro-ltd/instances/default/logs` |
+| Storage | `~/.mspro-ltd/instances/default/data/storage` |
+| Secrets key | `~/.mspro-ltd/instances/default/secrets/master.key` |
 
 Override with:
 
 ```sh
-PAPERCLIP_HOME=/custom/home PAPERCLIP_INSTANCE_ID=dev pnpm paperclipai run
+MSPROLTD_HOME=/custom/home MSPROLTD_INSTANCE_ID=dev pnpm msproltdai run
 ```
 
 Or pass `--data-dir` directly on any command:
 
 ```sh
-pnpm paperclipai run --data-dir ./tmp/paperclip-dev
-pnpm paperclipai doctor --data-dir ./tmp/paperclip-dev
+pnpm msproltdai run --data-dir ./tmp/mspro-ltd-dev
+pnpm msproltdai doctor --data-dir ./tmp/mspro-ltd-dev
 ```

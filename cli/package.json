@@ -1,13 +1,13 @@
 {
-  "name": "paperclipai",
+  "name": "msproltdai",
   "version": "0.3.1",
-  "description": "Paperclip CLI — orchestrate AI agent teams to run a business",
+  "description": "MSProLtd CLI — orchestrate AI agent teams to run a business",
   "type": "module",
   "bin": {
-    "paperclipai": "./dist/index.js"
+    "msproltdai": "./dist/index.js"
   },
   "keywords": [
-    "paperclip",
+    "mspro-ltd",
     "ai",
     "agents",
     "orchestration",
@@ -16,12 +16,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/paperclipai/paperclip",
+    "url": "https://github.com/vladimirspecalp-hub/mspro-ltd",
     "directory": "cli"
   },
-  "homepage": "https://github.com/paperclipai/paperclip",
+  "homepage": "https://github.com/vladimirspecalp-hub/mspro-ltd",
   "bugs": {
-    "url": "https://github.com/paperclipai/paperclip/issues"
+    "url": "https://github.com/vladimirspecalp-hub/mspro-ltd/issues"
   },
   "files": [
     "dist"
@@ -37,12 +37,12 @@
   },
   "dependencies": {
     "@clack/prompts": "^0.10.0",
-    "@paperclipai/adapter-claude-local": "workspace:*",
-    "@paperclipai/adapter-cursor-local": "workspace:*",
-    "@paperclipai/adapter-utils": "workspace:*",
-    "@paperclipai/db": "workspace:*",
-    "@paperclipai/server": "workspace:*",
-    "@paperclipai/shared": "workspace:*",
+    "@msproltd/adapter-claude-local": "workspace:*",
+    "@msproltd/adapter-cursor-local": "workspace:*",
+    "@msproltd/adapter-utils": "workspace:*",
+    "@msproltd/db": "workspace:*",
+    "@msproltd/server": "workspace:*",
+    "@msproltd/shared": "workspace:*",
     "drizzle-orm": "0.38.4",
     "dotenv": "^17.0.1",
     "commander": "^13.1.0",

@@ -1,4 +1,4 @@
-import type { Agent } from "@paperclipai/shared";
+import type { Agent } from "@msproltd/shared";
 import i18n from "@/i18n/config";
 
 type ActivityDetails = Record<string, unknown> | null | undefined;

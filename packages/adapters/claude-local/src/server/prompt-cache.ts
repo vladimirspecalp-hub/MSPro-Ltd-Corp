@@ -3,8 +3,8 @@ import fs from "node:fs/promises";
 import os from "node:os";
 import path from "node:path";
 import { createHash, type Hash } from "node:crypto";
-import type { AdapterExecutionContext } from "@paperclipai/adapter-utils";
-import { ensurePaperclipSkillSymlink, type PaperclipSkillEntry } from "@paperclipai/adapter-utils/server-utils";
+import type { AdapterExecutionContext } from "@msproltd/adapter-utils";
+import { ensurePaperclipSkillSymlink, type PaperclipSkillEntry } from "@msproltd/adapter-utils/server-utils";
 
 const DEFAULT_PAPERCLIP_INSTANCE_ID = "default";
 
@@ -25,8 +25,8 @@ function resolveManagedClaudePromptCacheRoot(
   env: NodeJS.ProcessEnv,
   companyId: string,
 ): string {
-  const paperclipHome = nonEmpty(env.PAPERCLIP_HOME) ?? path.resolve(os.homedir(), ".paperclip");
-  const instanceId = nonEmpty(env.PAPERCLIP_INSTANCE_ID) ?? DEFAULT_PAPERCLIP_INSTANCE_ID;
+  const paperclipHome = nonEmpty(env.MSPROLTD_HOME) ?? path.resolve(os.homedir(), ".mspro-ltd");
+  const instanceId = nonEmpty(env.MSPROLTD_INSTANCE_ID) ?? DEFAULT_PAPERCLIP_INSTANCE_ID;
   return path.resolve(
     paperclipHome,
     "instances",
@@ -88,7 +88,7 @@ async function buildClaudePromptBundleKey(input: {
   instructionsContents: string | null;
 }): Promise<string> {
   const hash = createHash("sha256");
-  hash.update("paperclip-claude-prompt-bundle:v1\n");
+  hash.update("mspro-ltd-claude-prompt-bundle:v1\n");
   if (input.instructionsContents) {
     hash.update("instructions\n");
     hash.update(input.instructionsContents);
@@ -151,7 +151,7 @@ export async function prepareClaudePromptBundle(input: {
     } catch (err) {
       await onLog(
         "stderr",
-        `[paperclip] Failed to materialize Claude skill "${entry.key}" into ${skillsHome}: ${err instanceof Error ? err.message : String(err)}\n`,
+        `[mspro-ltd] Failed to materialize Claude skill "${entry.key}" into ${skillsHome}: ${err instanceof Error ? err.message : String(err)}\n`,
       );
     }
   }

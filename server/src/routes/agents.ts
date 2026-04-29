@@ -1,8 +1,8 @@
 import { Router, type Request, type Response } from "express";
 import { generateKeyPairSync, randomUUID } from "node:crypto";
 import path from "node:path";
-import type { Db } from "@paperclipai/db";
-import { agents as agentsTable, companies, heartbeatRuns, issues as issuesTable } from "@paperclipai/db";
+import type { Db } from "@msproltd/db";
+import { agents as agentsTable, companies, heartbeatRuns, issues as issuesTable } from "@msproltd/db";
 import { and, desc, eq, inArray, not, sql } from "drizzle-orm";
 import {
   agentSkillSyncSchema,
@@ -22,12 +22,12 @@ import {
   updateAgentInstructionsPathSchema,
   wakeAgentSchema,
   updateAgentSchema,
-} from "@paperclipai/shared";
+} from "@msproltd/shared";
 import {
   readPaperclipSkillSyncPreference,
   writePaperclipSkillSyncPreference,
-} from "@paperclipai/adapter-utils/server-utils";
-import { trackAgentCreated } from "@paperclipai/shared/telemetry";
+} from "@msproltd/adapter-utils/server-utils";
+import { trackAgentCreated } from "@msproltd/shared/telemetry";
 import { validate } from "../middleware/validate.js";
 import {
   agentService,
@@ -61,8 +61,8 @@ import { redactEventPayload } from "../redaction.js";
 import { redactCurrentUserValue } from "../log-redaction.js";
 import { renderOrgChartSvg, renderOrgChartPng, type OrgNode, type OrgChartStyle, ORG_CHART_STYLES } from "./org-chart-svg.js";
 import { instanceSettingsService } from "../services/instance-settings.js";
-import { runClaudeLogin } from "@paperclipai/adapter-claude-local/server";
-import { DEFAULT_CURSOR_LOCAL_MODEL } from "@paperclipai/adapter-cursor-local";
+import { runClaudeLogin } from "@msproltd/adapter-claude-local/server";
+import { DEFAULT_CURSOR_LOCAL_MODEL } from "@msproltd/adapter-cursor-local";
 // MSPRO fork: placeholders для удалённых adapters — ветки кода с этими типами
 // никогда не исполнятся (BUILTIN_ADAPTER_TYPES содержит только claude/cursor/process/http)
 const DEFAULT_CODEX_LOCAL_MODEL = "";
@@ -127,7 +127,7 @@ export function agentRoutes(db: Db) {
   const companySkills = companySkillService(db);
   const workspaceOperations = workspaceOperationService(db);
   const instanceSettings = instanceSettingsService(db);
-  const strictSecretsMode = process.env.PAPERCLIP_SECRETS_STRICT_MODE === "true";
+  const strictSecretsMode = process.env.MSPROLTD_SECRETS_STRICT_MODE === "true";
 
   async function getCurrentUserRedactionOptions() {
     return {

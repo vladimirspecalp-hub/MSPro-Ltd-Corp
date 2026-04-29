@@ -1,4 +1,4 @@
-# i18n Backlog — русификация paperclip-mspro UI
+# i18n Backlog — русификация mspro-ltd-mspro UI
 
 ## Текущий статус
 
@@ -25,7 +25,7 @@ export function SomePage() {
 ```
 
 **Правила:**
-1. Перед началом — `pnpm dev` в `paperclip-mspro`, открыть страницу в браузере
+1. Перед началом — `pnpm dev` в `mspro-ltd-mspro`, открыть страницу в браузере
 2. Найти все строки на странице, которые видит пользователь
 3. Добавить ключи в `ru.json` + `en.json` под namespace страницы (например `dashboard.*`, `agents.*`)
 4. Заменить хардкод на `t("namespace.key")`

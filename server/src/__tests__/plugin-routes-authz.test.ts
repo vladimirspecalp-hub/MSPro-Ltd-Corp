@@ -67,7 +67,7 @@ describe("plugin install and upgrade authz", () => {
 
     const res = await request(app)
       .post("/api/plugins/install")
-      .send({ packageName: "paperclip-plugin-example" });
+      .send({ packageName: "mspro-ltd-plugin-example" });
 
     expect(res.status).toBe(403);
     expect(loader.installPlugin).not.toHaveBeenCalled();
@@ -75,7 +75,7 @@ describe("plugin install and upgrade authz", () => {
 
   it("allows instance admins to install plugins", async () => {
     const pluginId = "11111111-1111-4111-8111-111111111111";
-    const pluginKey = "paperclip.example";
+    const pluginKey = "mspro-ltd.example";
     const discovered = {
       manifest: {
         id: pluginKey,
@@ -85,13 +85,13 @@ describe("plugin install and upgrade authz", () => {
     mockRegistry.getByKey.mockResolvedValue({
       id: pluginId,
       pluginKey,
-      packageName: "paperclip-plugin-example",
+      packageName: "mspro-ltd-plugin-example",
       version: "1.0.0",
     });
     mockRegistry.getById.mockResolvedValue({
       id: pluginId,
       pluginKey,
-      packageName: "paperclip-plugin-example",
+      packageName: "mspro-ltd-plugin-example",
       version: "1.0.0",
     });
     mockLifecycle.load.mockResolvedValue(undefined);
@@ -109,11 +109,11 @@ describe("plugin install and upgrade authz", () => {
 
     const res = await request(app)
       .post("/api/plugins/install")
-      .send({ packageName: "paperclip-plugin-example" });
+      .send({ packageName: "mspro-ltd-plugin-example" });
 
     expect(res.status).toBe(200);
     expect(loader.installPlugin).toHaveBeenCalledWith({
-      packageName: "paperclip-plugin-example",
+      packageName: "mspro-ltd-plugin-example",
       version: undefined,
     });
     expect(mockLifecycle.load).toHaveBeenCalledWith(pluginId);
@@ -142,7 +142,7 @@ describe("plugin install and upgrade authz", () => {
     const pluginId = "11111111-1111-4111-8111-111111111111";
     mockRegistry.getById.mockResolvedValue({
       id: pluginId,
-      pluginKey: "paperclip.example",
+      pluginKey: "mspro-ltd.example",
       version: "1.0.0",
     });
     mockLifecycle.upgrade.mockResolvedValue({

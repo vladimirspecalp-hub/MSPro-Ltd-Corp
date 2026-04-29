@@ -1,4 +1,4 @@
-# @paperclipai/shared
+# @msproltd/shared
 
 ## 0.3.1
 

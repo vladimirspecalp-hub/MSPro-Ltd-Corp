@@ -23,7 +23,7 @@ type BindMode = (typeof BIND_MODES)[number];
 const worktreeEnvBootstrap = bootstrapDevRunnerWorktreeEnv(repoRoot, process.env);
 if (worktreeEnvBootstrap.missingEnv) {
   console.error(
-    `[paperclip] linked git worktree at ${repoRoot} is missing ${path.relative(repoRoot, worktreeEnvBootstrap.envPath)}. Run \`paperclipai worktree init\` in this worktree before \`pnpm dev\`.`,
+    `[mspro-ltd] linked git worktree at ${repoRoot} is missing ${path.relative(repoRoot, worktreeEnvBootstrap.envPath)}. Run \`msproltdai worktree init\` in this worktree before \`pnpm dev\`.`,
   );
   process.exit(1);
 }
@@ -34,7 +34,7 @@ const scanIntervalMs = 1500;
 const autoRestartPollIntervalMs = 2500;
 const gracefulShutdownTimeoutMs = 10_000;
 const changedPathSampleLimit = 5;
-const devServerStatusFilePath = path.join(repoRoot, ".paperclip", "dev-server-status.json");
+const devServerStatusFilePath = path.join(repoRoot, ".mspro-ltd", "dev-server-status.json");
 
 const watchedDirectories = [
   "cli",
@@ -67,7 +67,7 @@ const ignoredDirectoryNames = new Set([
 ]);
 
 const ignoredRelativePaths = new Set([
-  ".paperclip/dev-server-status.json",
+  ".mspro-ltd/dev-server-status.json",
 ]);
 
 const tailscaleAuthFlagNames = new Set([
@@ -89,7 +89,7 @@ for (let index = 0; index < cliArgs.length; index += 1) {
   if (arg === "--bind") {
     const value = cliArgs[index + 1];
     if (!value || value.startsWith("--") || !BIND_MODES.includes(value as BindMode)) {
-      console.error(`[paperclip] invalid --bind value. Use one of: ${BIND_MODES.join(", ")}`);
+      console.error(`[mspro-ltd] invalid --bind value. Use one of: ${BIND_MODES.join(", ")}`);
       process.exit(1);
     }
     bindMode = value as BindMode;
@@ -99,7 +99,7 @@ for (let index = 0; index < cliArgs.length; index += 1) {
   if (arg === "--bind-host") {
     const value = cliArgs[index + 1];
     if (!value || value.startsWith("--")) {
-      console.error("[paperclip] --bind-host requires a value");
+      console.error("[mspro-ltd] --bind-host requires a value");
       process.exit(1);
     }
     bindHost = value;
@@ -122,56 +122,56 @@ if (!bindHost && process.env.npm_config_bind_host) {
   bindHost = process.env.npm_config_bind_host;
 }
 if (bindMode === "custom" && !bindHost) {
-  console.error("[paperclip] --bind custom requires --bind-host <host>");
+  console.error("[mspro-ltd] --bind custom requires --bind-host <host>");
   process.exit(1);
 }
 
 const env: NodeJS.ProcessEnv = {
   ...process.env,
-  PAPERCLIP_UI_DEV_MIDDLEWARE: "true",
+  MSPROLTD_UI_DEV_MIDDLEWARE: "true",
 };
 
 if (mode === "dev") {
-  env.PAPERCLIP_DEV_SERVER_STATUS_FILE = devServerStatusFilePath;
-  env.PAPERCLIP_MIGRATION_AUTO_APPLY ??= "true";
+  env.MSPROLTD_DEV_SERVER_STATUS_FILE = devServerStatusFilePath;
+  env.MSPROLTD_MIGRATION_AUTO_APPLY ??= "true";
 }
 
 if (mode === "watch") {
-  env.PAPERCLIP_MIGRATION_PROMPT ??= "never";
-  env.PAPERCLIP_MIGRATION_AUTO_APPLY ??= "true";
+  env.MSPROLTD_MIGRATION_PROMPT ??= "never";
+  env.MSPROLTD_MIGRATION_AUTO_APPLY ??= "true";
 }
 
 if (tailscaleAuth || bindMode) {
   const effectiveBind = bindMode ?? "lan";
   if (tailscaleAuth) {
-    console.log("[paperclip] note: --tailscale-auth/--authenticated-private are legacy aliases for --bind lan");
+    console.log("[mspro-ltd] note: --tailscale-auth/--authenticated-private are legacy aliases for --bind lan");
   }
-  env.PAPERCLIP_BIND = effectiveBind;
+  env.MSPROLTD_BIND = effectiveBind;
   if (bindHost) {
-    env.PAPERCLIP_BIND_HOST = bindHost;
+    env.MSPROLTD_BIND_HOST = bindHost;
   } else {
-    delete env.PAPERCLIP_BIND_HOST;
+    delete env.MSPROLTD_BIND_HOST;
   }
   if (effectiveBind === "loopback" && !tailscaleAuth) {
-    delete env.PAPERCLIP_DEPLOYMENT_MODE;
-    delete env.PAPERCLIP_DEPLOYMENT_EXPOSURE;
-    delete env.PAPERCLIP_AUTH_BASE_URL_MODE;
-    console.log("[paperclip] dev mode: local_trusted (bind=loopback)");
+    delete env.MSPROLTD_DEPLOYMENT_MODE;
+    delete env.MSPROLTD_DEPLOYMENT_EXPOSURE;
+    delete env.MSPROLTD_AUTH_BASE_URL_MODE;
+    console.log("[mspro-ltd] dev mode: local_trusted (bind=loopback)");
   } else {
-    env.PAPERCLIP_DEPLOYMENT_MODE = "authenticated";
-    env.PAPERCLIP_DEPLOYMENT_EXPOSURE = "private";
-    env.PAPERCLIP_AUTH_BASE_URL_MODE = "auto";
+    env.MSPROLTD_DEPLOYMENT_MODE = "authenticated";
+    env.MSPROLTD_DEPLOYMENT_EXPOSURE = "private";
+    env.MSPROLTD_AUTH_BASE_URL_MODE = "auto";
     console.log(
-      `[paperclip] dev mode: authenticated/private (bind=${effectiveBind}${bindHost ? `:${bindHost}` : ""})`,
+      `[mspro-ltd] dev mode: authenticated/private (bind=${effectiveBind}${bindHost ? `:${bindHost}` : ""})`,
     );
   }
 } else {
-  delete env.PAPERCLIP_BIND;
-  delete env.PAPERCLIP_BIND_HOST;
-  delete env.PAPERCLIP_DEPLOYMENT_MODE;
-  delete env.PAPERCLIP_DEPLOYMENT_EXPOSURE;
-  delete env.PAPERCLIP_AUTH_BASE_URL_MODE;
-  console.log("[paperclip] dev mode: local_trusted (default)");
+  delete env.MSPROLTD_BIND;
+  delete env.MSPROLTD_BIND_HOST;
+  delete env.MSPROLTD_DEPLOYMENT_MODE;
+  delete env.MSPROLTD_DEPLOYMENT_EXPOSURE;
+  delete env.MSPROLTD_AUTH_BASE_URL_MODE;
+  console.log("[mspro-ltd] dev mode: local_trusted (default)");
 }
 
 const serverPort = Number.parseInt(env.PORT ?? process.env.PORT ?? "3100", 10) || 3100;
@@ -190,7 +190,7 @@ const existingRunner = await findAdoptableLocalService({
 });
 if (existingRunner) {
   console.log(
-    `[paperclip] ${devService.serviceName} already running (pid ${existingRunner.pid}${typeof existingRunner.metadata?.childPid === "number" ? `, child ${existingRunner.metadata.childPid}` : ""})`,
+    `[mspro-ltd] ${devService.serviceName} already running (pid ${existingRunner.pid}${typeof existingRunner.metadata?.childPid === "number" ? `, child ${existingRunner.metadata.childPid}` : ""})`,
   );
   process.exit(0);
 }
@@ -349,7 +349,7 @@ async function updateDevServiceRecord(extra?: Record<string, unknown>) {
   await writeLocalServiceRegistryRecord({
     version: 1,
     serviceKey: devService.serviceKey,
-    profileKind: "paperclip-dev",
+    profileKind: "mspro-ltd-dev",
     serviceName: devService.serviceName,
     command: "dev-runner.ts",
     cwd: repoRoot,
@@ -416,14 +416,14 @@ async function runPnpm(args: string[], options: {
 
 async function getMigrationStatusPayload() {
   const status = await runPnpm(
-    ["--filter", "@paperclipai/db", "exec", "tsx", "src/migration-status.ts", "--json"],
+    ["--filter", "@msproltd/db", "exec", "tsx", "src/migration-status.ts", "--json"],
     { env },
   );
   if (status.code !== 0) {
     process.stderr.write(
       status.stderr ||
         status.stdout ||
-        `[paperclip] Command failed with code ${status.code}: pnpm --filter @paperclipai/db exec tsx src/migration-status.ts --json\n`,
+        `[mspro-ltd] Command failed with code ${status.code}: pnpm --filter @msproltd/db exec tsx src/migration-status.ts --json\n`,
     );
     process.exit(status.code);
   }
@@ -434,7 +434,7 @@ async function getMigrationStatusPayload() {
     process.stderr.write(
       status.stderr ||
         status.stdout ||
-        "[paperclip] migration-status returned invalid JSON payload\n",
+        "[mspro-ltd] migration-status returned invalid JSON payload\n",
     );
     throw toError(error, "Unable to parse migration-status JSON output");
   }
@@ -452,7 +452,7 @@ async function refreshPendingMigrations() {
 
 async function maybePreflightMigrations(options: { interactive?: boolean; autoApply?: boolean; exitOnDecline?: boolean } = {}) {
   const interactive = options.interactive ?? mode === "watch";
-  const autoApply = options.autoApply ?? env.PAPERCLIP_MIGRATION_AUTO_APPLY === "true";
+  const autoApply = options.autoApply ?? env.MSPROLTD_MIGRATION_AUTO_APPLY === "true";
   const exitOnDecline = options.exitOnDecline ?? mode === "watch";
 
   const payload = await refreshPendingMigrations();
@@ -485,7 +485,7 @@ async function maybePreflightMigrations(options: { interactive?: boolean; autoAp
   if (!shouldApply) {
     if (exitOnDecline) {
       process.stderr.write(
-        `[paperclip] Pending migrations detected (${formatPendingMigrationSummary(pendingMigrations)}). Refusing to start watch mode against a stale schema.\n`,
+        `[mspro-ltd] Pending migrations detected (${formatPendingMigrationSummary(pendingMigrations)}). Refusing to start watch mode against a stale schema.\n`,
       );
       process.exit(1);
     }
@@ -509,9 +509,9 @@ async function maybePreflightMigrations(options: { interactive?: boolean; autoAp
 }
 
 async function buildPluginSdk() {
-  console.log("[paperclip] building plugin sdk...");
+  console.log("[mspro-ltd] building plugin sdk...");
   const result = await runPnpm(
-    ["--filter", "@paperclipai/plugin-sdk", "build"],
+    ["--filter", "@msproltd/plugin-sdk", "build"],
     { stdio: "inherit" },
   );
   if (result.signal) {
@@ -519,7 +519,7 @@ async function buildPluginSdk() {
     return;
   }
   if (result.code !== 0) {
-    console.error("[paperclip] plugin sdk build failed");
+    console.error("[mspro-ltd] plugin sdk build failed");
     process.exit(result.code);
   }
 }
@@ -589,7 +589,7 @@ async function startServerChild() {
   const serverScript = mode === "watch" ? "dev:watch" : "dev";
   child = spawn(
     pnpmBin,
-    ["--filter", "@paperclipai/server", serverScript, ...forwardedArgs],
+    ["--filter", "@msproltd/server", serverScript, ...forwardedArgs],
     { stdio: "inherit", env, shell: process.platform === "win32" },
   );
 

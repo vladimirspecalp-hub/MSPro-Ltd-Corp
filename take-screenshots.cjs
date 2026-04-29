@@ -2,7 +2,7 @@ const { chromium } = require('playwright');
 const { existsSync, mkdirSync } = require('fs');
 const path = require('path');
 
-const screenshotsDir = 'C:/CODE/Paperclip-MSPRO-org/departments/website/posts/designer/vault/references/calculator-2026-04/screenshots';
+const screenshotsDir = 'C:/CODE/MSProLtd-MSPRO-org/departments/website/posts/designer/vault/references/calculator-2026-04/screenshots';
 if (!existsSync(screenshotsDir)) mkdirSync(screenshotsDir, { recursive: true });
 
 const sites = [

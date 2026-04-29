@@ -58,7 +58,7 @@ const mockAdapter = vi.hoisted(() => ({
   syncSkills: vi.fn(),
 }));
 
-vi.mock("@paperclipai/shared/telemetry", () => ({
+vi.mock("@msproltd/shared/telemetry", () => ({
   trackAgentCreated: mockTrackAgentCreated,
   trackErrorHandlerCrash: vi.fn(),
 }));
@@ -91,7 +91,7 @@ vi.mock("../adapters/index.js", () => ({
 }));
 
 function registerModuleMocks() {
-  vi.doMock("@paperclipai/shared/telemetry", () => ({
+  vi.doMock("@msproltd/shared/telemetry", () => ({
     trackAgentCreated: mockTrackAgentCreated,
     trackErrorHandlerCrash: vi.fn(),
   }));
@@ -196,9 +196,9 @@ describe("agent skill routes", () => {
     mockSecretService.resolveAdapterConfigForRuntime.mockResolvedValue({ config: { env: {} } });
     mockCompanySkillService.listRuntimeSkillEntries.mockResolvedValue([
       {
-        key: "paperclipai/paperclip/paperclip",
-        runtimeName: "paperclip",
-        source: "/tmp/paperclip",
+        key: "msproltdai/mspro-ltd/mspro-ltd",
+        runtimeName: "mspro-ltd",
+        source: "/tmp/mspro-ltd",
         required: true,
         requiredReason: "required",
       },
@@ -206,8 +206,8 @@ describe("agent skill routes", () => {
     mockCompanySkillService.resolveRequestedSkillKeys.mockImplementation(
       async (_companyId: string, requested: string[]) =>
         requested.map((value) =>
-          value === "paperclip"
-            ? "paperclipai/paperclip/paperclip"
+          value === "mspro-ltd"
+            ? "msproltdai/mspro-ltd/mspro-ltd"
             : value,
         ),
     );
@@ -215,7 +215,7 @@ describe("agent skill routes", () => {
       adapterType: "claude_local",
       supported: true,
       mode: "ephemeral",
-      desiredSkills: ["paperclipai/paperclip/paperclip"],
+      desiredSkills: ["msproltdai/mspro-ltd/mspro-ltd"],
       entries: [],
       warnings: [],
     });
@@ -223,7 +223,7 @@ describe("agent skill routes", () => {
       adapterType: "claude_local",
       supported: true,
       mode: "ephemeral",
-      desiredSkills: ["paperclipai/paperclip/paperclip"],
+      desiredSkills: ["msproltdai/mspro-ltd/mspro-ltd"],
       entries: [],
       warnings: [],
     });
@@ -291,7 +291,7 @@ describe("agent skill routes", () => {
       adapterType: "codex_local",
       supported: true,
       mode: "ephemeral",
-      desiredSkills: ["paperclipai/paperclip/paperclip"],
+      desiredSkills: ["msproltdai/mspro-ltd/mspro-ltd"],
       entries: [],
       warnings: [],
     });
@@ -308,7 +308,7 @@ describe("agent skill routes", () => {
       adapterType: "cursor",
       supported: true,
       mode: "persistent",
-      desiredSkills: ["paperclipai/paperclip/paperclip"],
+      desiredSkills: ["msproltdai/mspro-ltd/mspro-ltd"],
       entries: [],
       warnings: [],
     });
@@ -324,7 +324,7 @@ describe("agent skill routes", () => {
 
     const res = await request(await createApp())
       .post("/api/agents/11111111-1111-4111-8111-111111111111/skills/sync?companyId=company-1")
-      .send({ desiredSkills: ["paperclipai/paperclip/paperclip"] });
+      .send({ desiredSkills: ["msproltdai/mspro-ltd/mspro-ltd"] });
 
     expect(res.status, JSON.stringify(res.body)).toBe(200);
     expect(mockAdapter.syncSkills).toHaveBeenCalled();
@@ -335,7 +335,7 @@ describe("agent skill routes", () => {
 
     const res = await request(await createApp())
       .post("/api/agents/11111111-1111-4111-8111-111111111111/skills/sync?companyId=company-1")
-      .send({ desiredSkills: ["paperclip"] });
+      .send({ desiredSkills: ["mspro-ltd"] });
 
     expect(res.status, JSON.stringify(res.body)).toBe(200);
     expect(mockAgentService.update).toHaveBeenCalledWith(
@@ -343,7 +343,7 @@ describe("agent skill routes", () => {
       expect.objectContaining({
         adapterConfig: expect.objectContaining({
           paperclipSkillSync: expect.objectContaining({
-            desiredSkills: ["paperclipai/paperclip/paperclip"],
+            desiredSkills: ["msproltdai/mspro-ltd/mspro-ltd"],
           }),
         }),
       }),
@@ -358,7 +358,7 @@ describe("agent skill routes", () => {
         name: "QA Agent",
         role: "engineer",
         adapterType: "claude_local",
-        desiredSkills: ["paperclip"],
+        desiredSkills: ["mspro-ltd"],
         adapterConfig: {},
       });
 
@@ -368,7 +368,7 @@ describe("agent skill routes", () => {
       expect.objectContaining({
         adapterConfig: expect.objectContaining({
           paperclipSkillSync: expect.objectContaining({
-            desiredSkills: ["paperclipai/paperclip/paperclip"],
+            desiredSkills: ["msproltdai/mspro-ltd/mspro-ltd"],
           }),
         }),
       }),
@@ -482,7 +482,7 @@ describe("agent skill routes", () => {
         name: "QA Agent",
         role: "engineer",
         adapterType: "claude_local",
-        desiredSkills: ["paperclip"],
+        desiredSkills: ["mspro-ltd"],
         adapterConfig: {},
       });
 
@@ -491,9 +491,9 @@ describe("agent skill routes", () => {
       "company-1",
       expect.objectContaining({
         payload: expect.objectContaining({
-          desiredSkills: ["paperclipai/paperclip/paperclip"],
+          desiredSkills: ["msproltdai/mspro-ltd/mspro-ltd"],
           requestedConfigurationSnapshot: expect.objectContaining({
-            desiredSkills: ["paperclipai/paperclip/paperclip"],
+            desiredSkills: ["msproltdai/mspro-ltd/mspro-ltd"],
           }),
         }),
       }),

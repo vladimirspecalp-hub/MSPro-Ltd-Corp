@@ -65,13 +65,13 @@ function formatEmbeddedPostgresError(error: unknown): string {
 }
 
 async function probeEmbeddedPostgresSupport(): Promise<EmbeddedPostgresTestSupport> {
-  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "paperclip-embedded-postgres-probe-"));
+  const dataDir = fs.mkdtempSync(path.join(os.tmpdir(), "mspro-ltd-embedded-postgres-probe-"));
   const port = await getAvailablePort();
   const EmbeddedPostgres = await getEmbeddedPostgresCtor();
   const instance = new EmbeddedPostgres({
     databaseDir: dataDir,
-    user: "paperclip",
-    password: "paperclip",
+    user: "mspro-ltd",
+    password: "mspro-ltd",
     port,
     persistent: true,
     initdbFlags: ["--encoding=UTF8", "--locale=C", "--lc-messages=C"],
@@ -109,8 +109,8 @@ export async function startEmbeddedPostgresTestDatabase(
   const EmbeddedPostgres = await getEmbeddedPostgresCtor();
   const instance = new EmbeddedPostgres({
     databaseDir: dataDir,
-    user: "paperclip",
-    password: "paperclip",
+    user: "mspro-ltd",
+    password: "mspro-ltd",
     port,
     persistent: true,
     initdbFlags: ["--encoding=UTF8", "--locale=C", "--lc-messages=C"],
@@ -122,9 +122,9 @@ export async function startEmbeddedPostgresTestDatabase(
     await instance.initialise();
     await instance.start();
 
-    const adminConnectionString = `postgres://paperclip:paperclip@127.0.0.1:${port}/postgres`;
-    await ensurePostgresDatabase(adminConnectionString, "paperclip");
-    const connectionString = `postgres://paperclip:paperclip@127.0.0.1:${port}/paperclip`;
+    const adminConnectionString = `postgres://mspro-ltd:mspro-ltd@127.0.0.1:${port}/postgres`;
+    await ensurePostgresDatabase(adminConnectionString, "mspro-ltd");
+    const connectionString = `postgres://mspro-ltd:mspro-ltd@127.0.0.1:${port}/mspro-ltd`;
     await applyPendingMigrations(connectionString);
 
     return {

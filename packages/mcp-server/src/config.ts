@@ -20,20 +20,20 @@ export function normalizeApiUrl(apiUrl: string): string {
 }
 
 export function readConfigFromEnv(env: NodeJS.ProcessEnv = process.env): PaperclipMcpConfig {
-  const apiUrl = nonEmpty(env.PAPERCLIP_API_URL);
+  const apiUrl = nonEmpty(env.MSPROLTD_API_URL);
   if (!apiUrl) {
-    throw new Error("Missing PAPERCLIP_API_URL");
+    throw new Error("Missing MSPROLTD_API_URL");
   }
-  const apiKey = nonEmpty(env.PAPERCLIP_API_KEY);
+  const apiKey = nonEmpty(env.MSPROLTD_API_KEY);
   if (!apiKey) {
-    throw new Error("Missing PAPERCLIP_API_KEY");
+    throw new Error("Missing MSPROLTD_API_KEY");
   }
 
   return {
     apiUrl: normalizeApiUrl(apiUrl),
     apiKey,
-    companyId: nonEmpty(env.PAPERCLIP_COMPANY_ID),
-    agentId: nonEmpty(env.PAPERCLIP_AGENT_ID),
-    runId: nonEmpty(env.PAPERCLIP_RUN_ID),
+    companyId: nonEmpty(env.MSPROLTD_COMPANY_ID),
+    agentId: nonEmpty(env.MSPROLTD_AGENT_ID),
+    runId: nonEmpty(env.MSPROLTD_RUN_ID),
   };
 }

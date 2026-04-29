@@ -93,7 +93,7 @@ import {
   MessageSquare,
   MoreHorizontal,
   MoreVertical,
-  Paperclip,
+  MSProLtd,
   Plus,
   Repeat,
   SlidersHorizontal,
@@ -108,7 +108,7 @@ import {
   type Issue,
   type IssueAttachment,
   type IssueComment,
-} from "@paperclipai/shared";
+} from "@msproltd/shared";
 
 type CommentReassignment = IssueCommentReassignment;
 type IssueDetailComment = (IssueComment | OptimisticIssueComment) & {
@@ -119,7 +119,7 @@ type IssueDetailComment = (IssueComment | OptimisticIssueComment) & {
   queueTargetRunId?: string | null;
 };
 
-const FEEDBACK_TERMS_URL = import.meta.env.VITE_FEEDBACK_TERMS_URL?.trim() || "https://paperclip.ing/tos";
+const FEEDBACK_TERMS_URL = import.meta.env.VITE_FEEDBACK_TERMS_URL?.trim() || "https://mspro-ltd.ing/tos";
 const ISSUE_COMMENT_PAGE_SIZE = 50;
 
 function resolveRunningIssueRun(
@@ -2152,7 +2152,7 @@ export function IssueDetail() {
           attachmentDragActive && "border-primary bg-primary/5",
         )}
       >
-        <Paperclip className="h-3.5 w-3.5 mr-1.5" />
+        <MSProLtd className="h-3.5 w-3.5 mr-1.5" />
         {uploadAttachment.isPending || importMarkdownDocument.isPending ? t("issue_detail.uploading") : (
           <>
             <span className="hidden sm:inline">{t("issue_detail.upload_attachment")}</span>
@@ -2412,7 +2412,7 @@ export function IssueDetail() {
             agents={agents}
             projects={projects}
             projectId={issue.projectId ?? undefined}
-            viewStateKey={`paperclip:issue-detail:${issue.id}:subissues-view`}
+            viewStateKey={`mspro-ltd:issue-detail:${issue.id}:subissues-view`}
             issueLinkState={resolvedIssueDetailState ?? location.state}
             searchFilters={{ parentId: issue.id }}
             baseCreateIssueDefaults={buildSubIssueDefaultsForViewer(issue, currentUserId)}
@@ -2635,7 +2635,7 @@ export function IssueDetail() {
               feedbackTermsUrl={FEEDBACK_TERMS_URL}
               agentMap={agentMap}
               currentUserId={currentUserId}
-              draftKey={`paperclip:issue-comment-draft:${issue.id}`}
+              draftKey={`mspro-ltd:issue-comment-draft:${issue.id}`}
               reassignOptions={commentReassignOptions}
               currentAssigneeValue={actualAssigneeValue}
               suggestedAssigneeValue={suggestedAssigneeValue}

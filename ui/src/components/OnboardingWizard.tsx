@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef, useCallback, useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
-import type { AdapterEnvironmentTestResult } from "@paperclipai/shared";
+import type { AdapterEnvironmentTestResult } from "@msproltd/shared";
 import { useLocation, useNavigate, useParams } from "@/lib/router";
 import { useDialog } from "../context/DialogContext";
 import { useCompany } from "../context/CompanyContext";
@@ -37,7 +37,7 @@ import {
 } from "../lib/onboarding-launch";
 import { buildNewAgentRuntimeConfig } from "../lib/new-agent-runtime-config";
 // MSPRO fork: импорты deleted adapters убраны — созданы локальные placeholder'ы
-import { DEFAULT_CURSOR_LOCAL_MODEL } from "@paperclipai/adapter-cursor-local";
+import { DEFAULT_CURSOR_LOCAL_MODEL } from "@msproltd/adapter-cursor-local";
 // Placeholders чтобы OnboardingWizard мог ссылаться на несуществующие типы
 // без ошибки типов (эти ветки просто никогда не выполнятся в MSPRO fork).
 const DEFAULT_CODEX_LOCAL_MODEL = "";

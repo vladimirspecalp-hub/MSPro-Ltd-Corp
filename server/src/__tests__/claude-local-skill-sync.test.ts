@@ -5,7 +5,7 @@ import { afterEach, describe, expect, it } from "vitest";
 import {
   listClaudeSkills,
   syncClaudeSkills,
-} from "@paperclipai/adapter-claude-local/server";
+} from "@msproltd/adapter-claude-local/server";
 
 async function makeTempDir(prefix: string): Promise<string> {
   return fs.mkdtemp(path.join(os.tmpdir(), prefix));
@@ -19,8 +19,8 @@ async function createSkillDir(root: string, name: string) {
 }
 
 describe("claude local skill sync", () => {
-  const paperclipKey = "paperclipai/paperclip/paperclip";
-  const createAgentKey = "paperclipai/paperclip/paperclip-create-agent";
+  const paperclipKey = "msproltdai/mspro-ltd/mspro-ltd";
+  const createAgentKey = "msproltdai/mspro-ltd/mspro-ltd-create-agent";
   const cleanupDirs = new Set<string>();
 
   afterEach(async () => {
@@ -28,7 +28,7 @@ describe("claude local skill sync", () => {
     cleanupDirs.clear();
   });
 
-  it("defaults to mounting all built-in Paperclip skills when no explicit selection exists", async () => {
+  it("defaults to mounting all built-in MSProLtd skills when no explicit selection exists", async () => {
     const snapshot = await listClaudeSkills({
       agentId: "agent-1",
       companyId: "company-1",
@@ -60,27 +60,27 @@ describe("claude local skill sync", () => {
     expect(snapshot.entries.find((entry) => entry.key === createAgentKey)?.state).toBe("configured");
   });
 
-  it("normalizes legacy flat Paperclip skill refs to canonical keys", async () => {
+  it("normalizes legacy flat MSProLtd skill refs to canonical keys", async () => {
     const snapshot = await listClaudeSkills({
       agentId: "agent-3",
       companyId: "company-1",
       adapterType: "claude_local",
       config: {
         paperclipSkillSync: {
-          desiredSkills: ["paperclip"],
+          desiredSkills: ["mspro-ltd"],
         },
       },
     });
 
     expect(snapshot.warnings).toEqual([]);
     expect(snapshot.desiredSkills).toContain(paperclipKey);
-    expect(snapshot.desiredSkills).not.toContain("paperclip");
+    expect(snapshot.desiredSkills).not.toContain("mspro-ltd");
     expect(snapshot.entries.find((entry) => entry.key === paperclipKey)?.state).toBe("configured");
-    expect(snapshot.entries.find((entry) => entry.key === "paperclip")).toBeUndefined();
+    expect(snapshot.entries.find((entry) => entry.key === "mspro-ltd")).toBeUndefined();
   });
 
   it("shows host-level user-installed Claude skills as read-only external entries", async () => {
-    const home = await makeTempDir("paperclip-claude-user-skills-");
+    const home = await makeTempDir("mspro-ltd-claude-user-skills-");
     cleanupDirs.add(home);
     await createSkillDir(path.join(home, ".claude", "skills"), "crack-python");
 
@@ -104,7 +104,7 @@ describe("claude local skill sync", () => {
       originLabel: "User-installed",
       locationLabel: "~/.claude/skills",
       readOnly: true,
-      detail: "Installed outside Paperclip management in the Claude skills home.",
+      detail: "Installed outside MSProLtd management in the Claude skills home.",
     }));
   });
 });

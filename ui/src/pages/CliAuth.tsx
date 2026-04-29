@@ -134,7 +134,7 @@ export function CliAuthPage() {
           </div>
           <div>
             <div className="text-muted-foreground">{t("cli_auth.client")}</div>
-            <div className="text-foreground">{challenge.clientName ?? "paperclipai cli"}</div>
+            <div className="text-foreground">{challenge.clientName ?? "msproltdai cli"}</div>
           </div>
           <div>
             <div className="text-muted-foreground">{t("cli_auth.requested_access")}</div>

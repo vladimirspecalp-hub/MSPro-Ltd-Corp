@@ -25,7 +25,7 @@ function mockJsonResponse(body: unknown, status = 200) {
   });
 }
 
-describe("paperclip MCP tools", () => {
+describe("mspro-ltd MCP tools", () => {
   beforeEach(() => {
     vi.restoreAllMocks();
   });
@@ -47,7 +47,7 @@ describe("paperclip MCP tools", () => {
     expect(String(url)).toBe("http://localhost:3100/api/issues/PAP-1135");
     expect(init.method).toBe("PATCH");
     expect((init.headers as Record<string, string>)["Authorization"]).toBe("Bearer token-123");
-    expect((init.headers as Record<string, string>)["X-Paperclip-Run-Id"]).toBe(
+    expect((init.headers as Record<string, string>)["X-MSProLtd-Run-Id"]).toBe(
       "33333333-3333-3333-3333-333333333333",
     );
   });

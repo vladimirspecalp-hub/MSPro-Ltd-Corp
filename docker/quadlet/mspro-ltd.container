@@ -1,0 +1,23 @@
+[Unit]
+Description=MSProLtd AI Agent Orchestrator
+Requires=mspro-ltd-db.service
+After=mspro-ltd-db.service
+
+[Container]
+Image=mspro-ltd-local
+ContainerName=mspro-ltd
+Pod=mspro-ltd.pod
+Volume=%h/.local/share/mspro-ltd:/mspro-ltd:Z
+Environment=HOST=0.0.0.0
+Environment=MSPROLTD_HOME=/mspro-ltd
+Environment=MSPROLTD_DEPLOYMENT_MODE=authenticated
+Environment=MSPROLTD_DEPLOYMENT_EXPOSURE=private
+Environment=MSPROLTD_PUBLIC_URL=http://localhost:3100
+EnvironmentFile=%h/.config/containers/systemd/mspro-ltd.env
+
+[Service]
+Restart=on-failure
+TimeoutStartSec=120
+
+[Install]
+WantedBy=default.target

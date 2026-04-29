@@ -1,10 +1,10 @@
-# paperclip-mspro
+# mspro-ltd-mspro
 
-Приватный MSPRO-форк проекта [Paperclip](https://github.com/paperclipai/paperclip) (MIT License). Используется как внутренняя control plane для управления AI-агентами по всем отделам MSPRO.
+Приватный MSPRO-форк проекта [MSProLtd](https://github.com/vladimirspecalp-hub/mspro-ltd) (MIT License). Используется как внутренняя control plane для управления AI-агентами по всем отделам MSPRO.
 
 ## Отличия от upstream
 
-Изначальный Paperclip поддерживает и подписочную авторизацию Claude Code, и API-ключи (pay-per-token). Эта ветка **жёстко запрещает API-режим** — чтобы случайно не уйти в минус по токенному биллингу.
+Изначальный MSProLtd поддерживает и подписочную авторизацию Claude Code, и API-ключи (pay-per-token). Эта ветка **жёстко запрещает API-режим** — чтобы случайно не уйти в минус по токенному биллингу.
 
 ### Что изменено
 
@@ -44,9 +44,9 @@ pnpm dev    # API + UI на http://localhost:3100
 
 ## Upstream
 
-Для сравнения с оригиналом и обновлений см. `C:\CODE\paperclip`. Делать merge вручную, предварительно прогоняя guard-тесты.
+Для сравнения с оригиналом и обновлений см. `C:\CODE\mspro-ltd`. Делать merge вручную, предварительно прогоняя guard-тесты.
 
-## Оригинальная документация Paperclip
+## Оригинальная документация MSProLtd
 
 См. `doc/`:
 - [doc/GOAL.md](doc/GOAL.md) — продуктовое видение

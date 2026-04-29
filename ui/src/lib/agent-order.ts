@@ -1,8 +1,8 @@
-import type { Agent } from "@paperclipai/shared";
+import type { Agent } from "@msproltd/shared";
 
-export const AGENT_ORDER_UPDATED_EVENT = "paperclip:agent-order-updated";
+export const AGENT_ORDER_UPDATED_EVENT = "mspro-ltd:agent-order-updated";
 const AGENT_ORDER_STORAGE_PREFIX = "mspro.agentOrder";
-const AGENT_ORDER_STORAGE_PREFIX_OLD = "paperclip.agentOrder";
+const AGENT_ORDER_STORAGE_PREFIX_OLD = "mspro-ltd.agentOrder";
 const ANONYMOUS_USER_ID = "anonymous";
 
 type AgentOrderUpdatedDetail = {

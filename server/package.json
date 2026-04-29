@@ -1,14 +1,14 @@
 {
-  "name": "@paperclipai/server",
+  "name": "@msproltd/server",
   "version": "0.3.1",
   "license": "MIT",
-  "homepage": "https://github.com/paperclipai/paperclip",
+  "homepage": "https://github.com/vladimirspecalp-hub/mspro-ltd",
   "bugs": {
-    "url": "https://github.com/paperclipai/paperclip/issues"
+    "url": "https://github.com/vladimirspecalp-hub/mspro-ltd/issues"
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/paperclipai/paperclip",
+    "url": "https://github.com/vladimirspecalp-hub/mspro-ltd",
     "directory": "server"
   },
   "type": "module",
@@ -33,23 +33,23 @@
   ],
   "scripts": {
     "dev": "tsx src/index.ts",
-    "dev:watch": "cross-env PAPERCLIP_MIGRATION_PROMPT=never PAPERCLIP_MIGRATION_AUTO_APPLY=true tsx ./scripts/dev-watch.ts",
+    "dev:watch": "cross-env MSPROLTD_MIGRATION_PROMPT=never MSPROLTD_MIGRATION_AUTO_APPLY=true tsx ./scripts/dev-watch.ts",
     "prepare:ui-dist": "bash ../scripts/prepare-server-ui-dist.sh",
     "build": "tsc && mkdir -p dist/onboarding-assets && cp -R src/onboarding-assets/. dist/onboarding-assets/",
     "prepack": "pnpm run prepare:ui-dist",
     "postpack": "rm -rf ui-dist",
     "clean": "rm -rf dist",
     "start": "node dist/index.js",
-    "typecheck": "pnpm --filter @paperclipai/plugin-sdk build && tsc --noEmit"
+    "typecheck": "pnpm --filter @msproltd/plugin-sdk build && tsc --noEmit"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.888.0",
-    "@paperclipai/adapter-claude-local": "workspace:*",
-    "@paperclipai/adapter-cursor-local": "workspace:*",
-    "@paperclipai/adapter-utils": "workspace:*",
-    "@paperclipai/db": "workspace:*",
-    "@paperclipai/plugin-sdk": "workspace:*",
-    "@paperclipai/shared": "workspace:*",
+    "@msproltd/adapter-claude-local": "workspace:*",
+    "@msproltd/adapter-cursor-local": "workspace:*",
+    "@msproltd/adapter-utils": "workspace:*",
+    "@msproltd/db": "workspace:*",
+    "@msproltd/plugin-sdk": "workspace:*",
+    "@msproltd/shared": "workspace:*",
     "ajv": "^8.18.0",
     "ajv-formats": "^3.0.1",
     "better-auth": "1.4.18",
@@ -60,7 +60,7 @@
     "drizzle-orm": "^0.38.4",
     "embedded-postgres": "^18.1.0-beta.16",
     "express": "^5.1.0",
-    "hermes-paperclip-adapter": "^0.2.0",
+    "hermes-mspro-ltd-adapter": "^0.2.0",
     "jsdom": "^28.1.0",
     "multer": "^2.1.1",
     "open": "^11.0.0",

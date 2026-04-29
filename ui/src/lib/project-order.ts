@@ -1,8 +1,8 @@
-import type { Project } from "@paperclipai/shared";
+import type { Project } from "@msproltd/shared";
 
-export const PROJECT_ORDER_UPDATED_EVENT = "paperclip:project-order-updated";
+export const PROJECT_ORDER_UPDATED_EVENT = "mspro-ltd:project-order-updated";
 const PROJECT_ORDER_STORAGE_PREFIX = "mspro.projectOrder";
-const PROJECT_ORDER_STORAGE_PREFIX_OLD = "paperclip.projectOrder";
+const PROJECT_ORDER_STORAGE_PREFIX_OLD = "mspro-ltd.projectOrder";
 const ANONYMOUS_USER_ID = "anonymous";
 
 type ProjectOrderUpdatedDetail = {

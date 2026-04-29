@@ -20,7 +20,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { History } from "lucide-react";
-import type { Agent } from "@paperclipai/shared";
+import type { Agent } from "@msproltd/shared";
 
 export function Activity() {
   const { t } = useTranslation();

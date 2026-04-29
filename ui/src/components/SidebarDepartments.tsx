@@ -21,7 +21,7 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
-import type { Agent } from "@paperclipai/shared";
+import type { Agent } from "@msproltd/shared";
 
 // localStorage key for persisting collapsed state per department
 const DEPT_EXPANDED_KEY_PREFIX = "mspro.deptExpanded";

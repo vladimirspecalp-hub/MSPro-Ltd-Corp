@@ -112,7 +112,7 @@ export class PaperclipApiClient {
     }
 
     if (this.runId) {
-      headers["x-paperclip-run-id"] = this.runId;
+      headers["x-mspro-ltd-run-id"] = this.runId;
     }
 
     let response: Response;
@@ -205,7 +205,7 @@ function buildConnectionErrorMessage(input: {
 }): string {
   const healthUrl = buildHealthCheckUrl(input.url);
   const lines = [
-    "Could not reach the Paperclip API.",
+    "Could not reach the MSProLtd API.",
     "",
     `Request: ${input.method} ${input.url}`,
   ];
@@ -214,12 +214,12 @@ function buildConnectionErrorMessage(input: {
   }
   lines.push(
     "",
-    "This usually means the Paperclip server is not running, the configured URL is wrong, or the request is being blocked before it reaches Paperclip.",
+    "This usually means the MSProLtd server is not running, the configured URL is wrong, or the request is being blocked before it reaches MSProLtd.",
     "",
     "Try:",
-    "- Start Paperclip with `pnpm dev` or `pnpm paperclipai run`.",
+    "- Start MSProLtd with `pnpm dev` or `pnpm msproltdai run`.",
     `- Verify the server is reachable with \`curl ${healthUrl}\`.`,
-    `- If Paperclip is running elsewhere, pass \`--api-base ${input.apiBase.replace(/\/+$/, "")}\` or set \`PAPERCLIP_API_URL\`.`,
+    `- If MSProLtd is running elsewhere, pass \`--api-base ${input.apiBase.replace(/\/+$/, "")}\` or set \`MSPROLTD_API_URL\`.`,
   );
   return lines.join("\n");
 }

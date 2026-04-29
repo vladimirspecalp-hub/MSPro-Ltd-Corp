@@ -2,11 +2,11 @@ services:
   db:
     image: postgres:17-alpine
     environment:
-      POSTGRES_USER: paperclip
-      POSTGRES_PASSWORD: paperclip
-      POSTGRES_DB: paperclip
+      POSTGRES_USER: mspro-ltd
+      POSTGRES_PASSWORD: mspro-ltd
+      POSTGRES_DB: mspro-ltd
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U paperclip -d paperclip"]
+      test: ["CMD-SHELL", "pg_isready -U mspro-ltd -d mspro-ltd"]
       interval: 2s
       timeout: 5s
       retries: 30
@@ -22,19 +22,19 @@ services:
     ports:
       - "3100:3100"
     environment:
-      DATABASE_URL: postgres://paperclip:paperclip@db:5432/paperclip
+      DATABASE_URL: postgres://mspro-ltd:mspro-ltd@db:5432/mspro-ltd
       PORT: "3100"
       SERVE_UI: "true"
-      PAPERCLIP_DEPLOYMENT_MODE: "authenticated"
-      PAPERCLIP_DEPLOYMENT_EXPOSURE: "private"
-      PAPERCLIP_PUBLIC_URL: "${PAPERCLIP_PUBLIC_URL:-http://localhost:3100}"
+      MSPROLTD_DEPLOYMENT_MODE: "authenticated"
+      MSPROLTD_DEPLOYMENT_EXPOSURE: "private"
+      MSPROLTD_PUBLIC_URL: "${MSPROLTD_PUBLIC_URL:-http://localhost:3100}"
       BETTER_AUTH_SECRET: "${BETTER_AUTH_SECRET:?BETTER_AUTH_SECRET must be set}"
     volumes:
-      - paperclip-data:/paperclip
+      - mspro-ltd-data:/mspro-ltd
     depends_on:
       db:
         condition: service_healthy
 
 volumes:
   pgdata:
-  paperclip-data:
+  mspro-ltd-data:

@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import type { Company } from "@paperclipai/shared";
+import type { Company } from "@msproltd/shared";
 import { companiesApi } from "../api/companies";
 import { ApiError } from "../api/client";
 import { queryKeys } from "../lib/queryKeys";
@@ -32,7 +32,7 @@ interface CompanyContextValue {
 }
 
 const STORAGE_KEY = "mspro.selectedCompanyId";
-const STORAGE_KEY_OLD = "paperclip.selectedCompanyId";
+const STORAGE_KEY_OLD = "mspro-ltd.selectedCompanyId";
 
 function migrateCompanyId(): string | null {
   try {
