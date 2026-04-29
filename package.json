@@ -37,10 +37,15 @@
     "evals:smoke": "cd evals/promptfoo && npx promptfoo@0.103.3 eval",
     "test:release-smoke": "npx playwright test --config tests/release-smoke/playwright.config.ts",
     "test:release-smoke:headed": "npx playwright test --config tests/release-smoke/playwright.config.ts --headed",
-    "metrics:mspro-ltd-commits": "tsx scripts/mspro-ltd-commit-metrics.ts"
+    "metrics:mspro-ltd-commits": "tsx scripts/mspro-ltd-commit-metrics.ts",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build",
+    "tauri:icon": "tauri icon"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",
+    "@tauri-apps/cli": "^2",
     "cross-env": "^10.1.0",
     "esbuild": "^0.27.3",
     "typescript": "^5.7.3",
