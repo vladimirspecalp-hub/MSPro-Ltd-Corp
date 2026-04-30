@@ -1,6 +1,6 @@
 [package]
 name = "mspro-ltd-corp"
-version = "0.1.0"
+version = "0.1.1"
 description = "MSPro-Ltd Corp — Desktop Application"
 authors = ["MSPro-Ltd Corp"]
 edition = "2021"
@@ -15,7 +15,7 @@ crate-type = ["staticlib", "cdylib", "rlib"]
 tauri-build = { version = "2", features = [] }
 
 [dependencies]
-tauri = { version = "2", features = [] }
+tauri = { version = "2", features = ["devtools"] }
 tauri-plugin-opener = "2"
 tauri-plugin-shell = "2"
 tauri-plugin-updater = "2"

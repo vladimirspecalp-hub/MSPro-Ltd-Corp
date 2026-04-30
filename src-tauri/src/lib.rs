@@ -73,7 +73,7 @@ pub fn run() {
 
     // Only spawn the embedded server in production (release) builds.
     // Embedded server bundling not implemented yet (P-2026-021 backlog).
-    // App expects external Paperclip server on http://127.0.0.1:3100 in v0.1.0.
+    // App expects external MSProLtd server on http://127.0.0.1:3100 in v0.1.0.
     // spawn_server() disabled to prevent silent failures.
     let _ = spawn_server;
 

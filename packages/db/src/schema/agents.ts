@@ -9,6 +9,7 @@ import {
   index,
 } from "drizzle-orm/pg-core";
 import { companies } from "./companies.js";
+import { departments } from "./departments.js";
 
 export const agents = pgTable(
   "agents",
@@ -21,6 +22,7 @@ export const agents = pgTable(
     icon: text("icon"),
     status: text("status").notNull().default("idle"),
     reportsTo: uuid("reports_to").references((): AnyPgColumn => agents.id),
+    departmentId: uuid("department_id").references(() => departments.id, { onDelete: "set null" }),
     capabilities: text("capabilities"),
     adapterType: text("adapter_type").notNull().default("process"),
     adapterConfig: jsonb("adapter_config").$type<Record<string, unknown>>().notNull().default({}),

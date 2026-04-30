@@ -191,6 +191,13 @@ export {
 } from "./goal.js";
 
 export {
+  createDepartmentSchema,
+  updateDepartmentSchema,
+  type CreateDepartment,
+  type UpdateDepartment,
+} from "./department.js";
+
+export {
   createApprovalSchema,
   resolveApprovalSchema,
   requestApprovalRevisionSchema,

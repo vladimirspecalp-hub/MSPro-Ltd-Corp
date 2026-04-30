@@ -1,53 +1,33 @@
 node_modules/
-dist/
-.env
-*.tsbuildinfo
-drizzle/meta/
-.vite/
-coverage/
-.DS_Store
-data/
-.mspro-ltd/
 .pnpm-store/
-tmp-*
-cli/tmp/
+dist/
+build/
+.paperclip/
+.mspro-ltd/
+.turbo/
+.vite/
+*.tsbuildinfo
+*.log
+.env
+.env.local
 
-# Scratch/seed scripts (but not scripts/ dir)
-check-*.mjs
-!scripts/check-*.mjs
-new-agent*.json
-newcompany.json
-seed-*.mjs
-server/check-*.mjs
-server/seed-*.mjs
-packages/db/seed-*.mjs
+# Tauri build outputs
+src-tauri/target/
+src-tauri/gen/
+src-tauri/WixTools/
 
-# npm publish build artifacts
-cli/package.dev.json
+# Build helpers (one-shot scripts kept locally)
+fix-icon.mjs
+fix-icon.py
+generate-icon.mjs
+take-mockups.mjs
+take-mockup-screenshots.mjs
+take-screenshots.cjs
 
-# Build artifacts in src directories
-server/src/**/*.js
-server/src/**/*.js.map
-server/src/**/*.d.ts
-server/src/**/*.d.ts.map
-tmp/
-feedback-export-*
+# Session/runtime
+*.local
+.DS_Store
+Thumbs.db
 
-# Editor / tool temp files
-*.tmp
-.vscode/
-.claude/settings.local.json
-.mspro-ltd-local/
-/.idea/
-/.agents/
-
-# Doc maintenance cursor
-.doc-review-cursor
-
-# Playwright
-tests/e2e/test-results/
-tests/e2e/playwright-report/
-tests/release-smoke/test-results/
-tests/release-smoke/playwright-report/
-.superset/
-.claude/worktrees/
+# Build helpers from rebuild
+.departments-wip/

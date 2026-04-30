@@ -302,7 +302,6 @@ export function IssuesList({
   const [assigneeSearch, setAssigneeSearch] = useState("");
   const [issueSearch, setIssueSearch] = useState(initialSearch ?? "");
   const [renderedIssueRowLimit, setRenderedIssueRowLimit] = useState(INITIAL_ISSUE_ROW_RENDER_LIMIT);
-  const loadMoreSentinelRef = useRef<HTMLDivElement | null>(null);
   const [visibleIssueColumns, setVisibleIssueColumns] = useState<InboxIssueColumn[]>(() => loadIssueColumns(scopedKey));
   const deferredIssueSearch = useDeferredValue(issueSearch);
   const normalizedIssueSearch = deferredIssueSearch.trim().toLowerCase();
@@ -616,26 +615,17 @@ export function IssuesList({
     setRenderedIssueRowLimit(Math.min(filtered.length, INITIAL_ISSUE_ROW_RENDER_LIMIT));
   }, [filtered, viewState.viewMode]);
 
-  // Lazy-load next batch of issue rows using IntersectionObserver when the
-  // sentinel at the bottom of the list scrolls into view. This prevents
-  // eagerly rendering all N rows at once (O(N) DOM nodes from a setTimeout(0)
-  // loop) and instead defers rendering until the user actually scrolls down.
   useEffect(() => {
-    const sentinel = loadMoreSentinelRef.current;
-    if (!sentinel || viewState.viewMode !== "list" || renderedIssueRowLimit >= filtered.length) return;
+    if (viewState.viewMode !== "list") return;
+    if (renderedIssueRowLimit >= filtered.length) return;
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0]?.isIntersecting) {
-          startTransition(() => {
-            setRenderedIssueRowLimit((current) => Math.min(filtered.length, current + ISSUE_ROW_RENDER_BATCH_SIZE));
-          });
-        }
-      },
-      { rootMargin: "200px" },
-    );
-    observer.observe(sentinel);
-    return () => observer.disconnect();
+    const timeoutId = window.setTimeout(() => {
+      startTransition(() => {
+        setRenderedIssueRowLimit((current) => Math.min(filtered.length, current + ISSUE_ROW_RENDER_BATCH_SIZE));
+      });
+    }, ISSUE_ROW_RENDER_BATCH_DELAY_MS);
+
+    return () => window.clearTimeout(timeoutId);
   }, [filtered.length, renderedIssueRowLimit, viewState.viewMode]);
 
   const remainingIssueRowCount = Math.max(filtered.length - renderedIssueRowLimit, 0);
@@ -1130,9 +1120,9 @@ export function IssuesList({
           );
           })}
           {remainingIssueRowCount > 0 && (
-            <div ref={loadMoreSentinelRef} className="py-2 text-center text-xs text-muted-foreground">
+            <p className="text-xs text-muted-foreground">
               {t("issues.render_progress", { rendered: Math.min(renderedIssueRowLimit, filtered.length), total: filtered.length })}
-            </div>
+            </p>
           )}
         </>
       )}

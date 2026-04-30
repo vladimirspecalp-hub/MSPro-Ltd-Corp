@@ -1,4 +1,3 @@
-import { useTranslation } from "react-i18next";
 import type { AdapterConfigFieldsProps } from "../types";
 import {
   Field,
@@ -13,6 +12,9 @@ import { LocalWorkspaceRuntimeFields } from "../local-workspace-runtime-fields";
 const inputClass =
   "w-full rounded-md border border-border px-2.5 py-1.5 bg-transparent outline-none text-sm font-mono placeholder:text-muted-foreground/40";
 
+const instructionsFileHint =
+  "Absolute path to a markdown file (e.g. AGENTS.md) that defines this agent's behavior. Injected into the system prompt at runtime.";
+
 export function ClaudeLocalConfigFields({
   mode,
   isCreate,
@@ -25,14 +27,10 @@ export function ClaudeLocalConfigFields({
   models,
   hideInstructionsFile,
 }: AdapterConfigFieldsProps) {
-  const { t } = useTranslation();
   return (
     <>
       {!hideInstructionsFile && (
-        <Field
-          label={t("adapter_config.agent_instructions_file")}
-          hint={t("adapter_config.agent_instructions_file_hint")}
-        >
+        <Field label="Agent instructions file" hint={instructionsFileHint}>
           <div className="flex items-center gap-2">
             <DraftInput
               value={
@@ -80,11 +78,10 @@ export function ClaudeLocalAdvancedFields({
   eff,
   mark,
 }: AdapterConfigFieldsProps) {
-  const { t } = useTranslation();
   return (
     <>
       <ToggleField
-        label={t("adapter_config.enable_chrome")}
+        label="Enable Chrome"
         hint={help.chrome}
         checked={
           isCreate
@@ -98,7 +95,7 @@ export function ClaudeLocalAdvancedFields({
         }
       />
       <ToggleField
-        label={t("adapter_config.skip_permissions")}
+        label="Skip permissions"
         hint={help.dangerouslySkipPermissions}
         checked={
           isCreate
@@ -115,7 +112,7 @@ export function ClaudeLocalAdvancedFields({
             : mark("adapterConfig", "dangerouslySkipPermissions", v)
         }
       />
-      <Field label={t("adapter_config.max_turns_per_run")} hint={help.maxTurnsPerRun}>
+      <Field label="Max turns per run" hint={help.maxTurnsPerRun}>
         {isCreate ? (
           <input
             type="number"

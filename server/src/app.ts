@@ -32,6 +32,7 @@ import { assetRoutes } from "./routes/assets.js";
 import { accessRoutes } from "./routes/access.js";
 import { pluginRoutes } from "./routes/plugins.js";
 import { adapterRoutes } from "./routes/adapters.js";
+import { departmentRoutes } from "./routes/departments.js";
 import { pluginUiStaticRoutes } from "./routes/plugin-ui-static.js";
 import { applyUiBranding } from "./ui-branding.js";
 import { logger } from "./middleware/logger.js";
@@ -126,6 +127,40 @@ export async function createApp(
 ) {
   const app = express();
 
+  // CORS for Tauri desktop wrapper (MSPro-Ltd Corp). The webview origin is
+  // `http://tauri.localhost` and needs cross-origin permission to reach the
+  // MSProLtd API on `127.0.0.1:3100`. Local browser dev (`localhost:5173`)
+  // continues to work via Vite proxy, this middleware is permissive only for
+  // explicit known origins.
+  const allowedOrigins = new Set<string>([
+    "http://tauri.localhost",
+    "https://tauri.localhost",
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+  ]);
+  app.use((req, res, next) => {
+    const origin = req.headers.origin;
+    if (origin && allowedOrigins.has(origin)) {
+      res.setHeader("Access-Control-Allow-Origin", origin);
+      res.setHeader("Access-Control-Allow-Credentials", "true");
+      res.setHeader("Vary", "Origin");
+      res.setHeader(
+        "Access-Control-Allow-Headers",
+        req.headers["access-control-request-headers"] || "Content-Type, Authorization, Accept",
+      );
+      res.setHeader(
+        "Access-Control-Allow-Methods",
+        "GET, POST, PUT, PATCH, DELETE, OPTIONS",
+      );
+      res.setHeader("Access-Control-Max-Age", "86400");
+    }
+    if (req.method === "OPTIONS" && origin && allowedOrigins.has(origin)) {
+      res.status(204).end();
+      return;
+    }
+    next();
+  });
+
   app.use(express.json({
     // Company import/export payloads can inline full portable packages.
     limit: "10mb",
@@ -209,6 +244,7 @@ export async function createApp(
   api.use(sidebarPreferenceRoutes(db));
   api.use(inboxDismissalRoutes(db));
   api.use(instanceSettingsRoutes(db));
+  api.use(departmentRoutes(db));
   const hostServicesDisposers = new Map<string, () => void>();
   const workerManager = createPluginWorkerManager();
   const pluginRegistry = pluginRegistryService(db);

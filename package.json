@@ -37,15 +37,10 @@
     "evals:smoke": "cd evals/promptfoo && npx promptfoo@0.103.3 eval",
     "test:release-smoke": "npx playwright test --config tests/release-smoke/playwright.config.ts",
     "test:release-smoke:headed": "npx playwright test --config tests/release-smoke/playwright.config.ts --headed",
-    "metrics:mspro-ltd-commits": "tsx scripts/mspro-ltd-commit-metrics.ts",
-    "tauri": "tauri",
-    "tauri:dev": "tauri dev",
-    "tauri:build": "tauri build",
-    "tauri:icon": "tauri icon"
+    "metrics:mspro-ltd-commits": "tsx scripts/mspro-ltd-commit-metrics.ts"
   },
   "devDependencies": {
     "@playwright/test": "^1.58.2",
-    "@tauri-apps/cli": "^2",
     "cross-env": "^10.1.0",
     "esbuild": "^0.27.3",
     "typescript": "^5.7.3",
@@ -60,8 +55,7 @@
       "embedded-postgres@18.1.0-beta.16": "patches/embedded-postgres@18.1.0-beta.16.patch"
     },
     "overrides": {
-      "rollup": ">=4.59.0",
-      "hermes-mspro-ltd-adapter": "npm:hermes-paperclip-adapter@^0.2.0"
+      "rollup": ">=4.59.0"
     }
   }
 }

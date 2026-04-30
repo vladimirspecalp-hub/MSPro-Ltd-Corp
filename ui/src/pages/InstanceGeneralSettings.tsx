@@ -8,7 +8,7 @@ import {
   MONTHLY_RETENTION_PRESETS,
   DEFAULT_BACKUP_RETENTION,
 } from "@msproltd/shared";
-import { Globe, LogOut, SlidersHorizontal, Zap } from "lucide-react";
+import { Globe, LogOut, SlidersHorizontal } from "lucide-react";
 import { authApi } from "@/api/auth";
 import { instanceSettingsApi } from "@/api/instanceSettings";
 import { Button } from "../components/ui/button";
@@ -74,7 +74,6 @@ export function InstanceGeneralSettings() {
 
   const censorUsernameInLogs = generalQuery.data?.censorUsernameInLogs === true;
   const keyboardShortcuts = generalQuery.data?.keyboardShortcuts === true;
-  const gpuMode = generalQuery.data?.gpuMode === true;
   const feedbackDataSharingPreference = generalQuery.data?.feedbackDataSharingPreference ?? "prompt";
   const backupRetention: BackupRetentionPolicy = generalQuery.data?.backupRetention ?? DEFAULT_BACKUP_RETENTION;
 
@@ -156,29 +155,6 @@ export function InstanceGeneralSettings() {
             onCheckedChange={() => updateGeneralMutation.mutate({ keyboardShortcuts: !keyboardShortcuts })}
             disabled={updateGeneralMutation.isPending}
             aria-label={t("instance.shortcuts_aria")}
-          />
-        </div>
-      </section>
-
-      <section className="rounded-xl border border-border bg-card p-5">
-        <div className="flex items-start justify-between gap-4">
-          <div className="space-y-1.5">
-            <div className="flex items-center gap-2">
-              <Zap className="h-4 w-4 text-muted-foreground" />
-              <h2 className="text-sm font-semibold">{t("instance.gpu_mode_title")}</h2>
-            </div>
-            <p className="max-w-2xl text-sm text-muted-foreground">
-              {t("instance.gpu_mode_help")}
-            </p>
-            <p className="text-xs text-amber-600 dark:text-amber-400">
-              {t("instance.gpu_mode_restart")}
-            </p>
-          </div>
-          <ToggleSwitch
-            checked={gpuMode}
-            onCheckedChange={() => updateGeneralMutation.mutate({ gpuMode: !gpuMode })}
-            disabled={updateGeneralMutation.isPending}
-            aria-label={t("instance.gpu_mode_aria")}
           />
         </div>
       </section>
