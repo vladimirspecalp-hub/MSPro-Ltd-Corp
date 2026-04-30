@@ -81,6 +81,7 @@ const MAX_LIVE_LOG_CHUNK_BYTES = 8 * 1024;
 const MAX_PERSISTED_LOG_CHUNK_CHARS = 64 * 1024;
 const HEARTBEAT_MAX_CONCURRENT_RUNS_DEFAULT = 1;
 const HEARTBEAT_MAX_CONCURRENT_RUNS_MAX = 10;
+const MAX_HIGH_PRIORITY_CONCURRENT_RUNS = 3;
 const DEFERRED_WAKE_CONTEXT_KEY = "_paperclipWakeContext";
 const WAKE_COMMENT_IDS_KEY = "wakeCommentIds";
 const MSPROLTD_WAKE_PAYLOAD_KEY = "paperclipWake";
@@ -2606,6 +2607,21 @@ export function heartbeatService(db: Db) {
     return Number(count ?? 0);
   }
 
+  async function countRunningHighPriorityRunsForCompany(companyId: string): Promise<number> {
+    const [row] = await db
+      .select({ count: sql<number>`count(*)` })
+      .from(heartbeatRuns)
+      .innerJoin(issues, sql`${issues.id}::text = (${heartbeatRuns.contextSnapshot} ->> 'issueId')`)
+      .where(
+        and(
+          eq(heartbeatRuns.companyId, companyId),
+          eq(heartbeatRuns.status, "running"),
+          eq(issues.priority, "high"),
+        ),
+      );
+    return Number(row?.count ?? 0);
+  }
+
   async function claimQueuedRun(run: typeof heartbeatRuns.$inferSelect) {
     if (run.status !== "queued") return run;
     const agent = await getAgent(run.agentId);
@@ -2626,6 +2642,28 @@ export function heartbeatService(db: Db) {
     if (budgetBlock) {
       await cancelRunInternal(run.id, budgetBlock.reason);
       return null;
+    }
+
+    // Anti-overload guard: limit company-wide concurrent high-priority runs.
+    // If the issue associated with this run is high priority and we are already at
+    // MAX_HIGH_PRIORITY_CONCURRENT_RUNS running high-priority runs, leave the run
+    // queued — it will be retried by the periodic resumeQueuedRuns tick.
+    const contextIssueId = readNonEmptyString(parseObject(run.contextSnapshot).issueId);
+    if (contextIssueId) {
+      const [issueRow] = await db
+        .select({ priority: issues.priority })
+        .from(issues)
+        .where(and(eq(issues.id, contextIssueId), eq(issues.companyId, run.companyId)));
+      if (issueRow?.priority === "high") {
+        const runningHighCount = await countRunningHighPriorityRunsForCompany(run.companyId);
+        if (runningHighCount >= MAX_HIGH_PRIORITY_CONCURRENT_RUNS) {
+          logger.info(
+            { runId: run.id, agentId: run.agentId, runningHighCount, limit: MAX_HIGH_PRIORITY_CONCURRENT_RUNS },
+            "anti-overload guard: high-priority run deferred, limit reached",
+          );
+          return null; // Leave run in queued status; will be retried by resumeQueuedRuns
+        }
+      }
     }
 
     const claimedAt = new Date();
