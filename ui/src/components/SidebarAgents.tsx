@@ -1,7 +1,9 @@
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { NavLink, useLocation } from "@/lib/router";
 import { useQuery } from "@tanstack/react-query";
+import { List } from "react-window";
+import type { RowComponentProps } from "react-window";
 import { ChevronRight, Plus } from "lucide-react";
 import { useCompany } from "../context/CompanyContext";
 import { useDialog } from "../context/DialogContext";
@@ -21,6 +23,75 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible";
 import type { Agent } from "@msproltd/shared";
+
+const AGENT_ITEM_HEIGHT = 32;
+// Cap the visible list height so the sidebar doesn't grow unbounded when
+// there are many agents. Items beyond this window are virtualised.
+const MAX_VIRTUAL_LIST_HEIGHT = 280;
+
+type AgentRowSharedProps = {
+  orderedAgents: Agent[];
+  liveCountByAgent: Map<string, number>;
+  activeAgentId: string | null;
+  activeTab: string | null;
+  onAgentClick: () => void;
+  budgetLabel: string;
+};
+
+type AgentNavRowProps = RowComponentProps<AgentRowSharedProps>;
+
+function AgentNavRow({
+  index,
+  style,
+  ariaAttributes,
+  orderedAgents,
+  liveCountByAgent,
+  activeAgentId,
+  activeTab,
+  onAgentClick,
+  budgetLabel,
+}: AgentNavRowProps) {
+  const agent = orderedAgents[index]!;
+  const runCount = liveCountByAgent.get(agent.id) ?? 0;
+  return (
+    <div style={style}>
+      <NavLink
+        {...ariaAttributes}
+        to={activeTab ? `${agentUrl(agent)}/${activeTab}` : agentUrl(agent)}
+        state={SIDEBAR_SCROLL_RESET_STATE}
+        onClick={onAgentClick}
+        className={cn(
+          "flex h-full items-center gap-2.5 px-3 text-[13px] font-medium transition-colors",
+          activeAgentId === agentRouteRef(agent)
+            ? "bg-accent text-foreground"
+            : "text-foreground/80 hover:bg-accent/50 hover:text-foreground",
+        )}
+      >
+        <AgentIcon icon={agent.icon} className="shrink-0 h-3.5 w-3.5 text-muted-foreground" />
+        <span className="flex-1 truncate">{agent.name}</span>
+        {(agent.pauseReason === "budget" || runCount > 0) && (
+          <span className="ml-auto flex items-center gap-1.5 shrink-0">
+            {agent.pauseReason === "budget" ? (
+              <BudgetSidebarMarker title={budgetLabel} />
+            ) : null}
+            {runCount > 0 ? (
+              <span className="relative flex h-2 w-2">
+                <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
+                <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
+              </span>
+            ) : null}
+            {runCount > 0 ? (
+              <span className="text-[11px] font-medium text-blue-600 dark:text-blue-400">
+                {runCount} live
+              </span>
+            ) : null}
+          </span>
+        )}
+      </NavLink>
+    </div>
+  );
+}
+
 export function SidebarAgents() {
   const { t } = useTranslation();
   const [open, setOpen] = useState(true);
@@ -55,11 +126,9 @@ export function SidebarAgents() {
   }, [liveRuns]);
 
   const visibleAgents = useMemo(() => {
-    const filtered = (agents ?? []).filter(
-      (a: Agent) => a.status !== "terminated"
-    );
-    return filtered;
+    return (agents ?? []).filter((a: Agent) => a.status !== "terminated");
   }, [agents]);
+
   const currentUserId = session?.user?.id ?? session?.session?.userId ?? null;
   const { orderedAgents } = useAgentOrder({
     agents: visibleAgents,
@@ -71,6 +140,20 @@ export function SidebarAgents() {
   const activeAgentId = agentMatch?.[1] ?? null;
   const activeTab = agentMatch?.[2] ?? null;
 
+  const handleAgentClick = useCallback(() => {
+    if (isMobile) setSidebarOpen(false);
+  }, [isMobile, setSidebarOpen]);
+
+  const rowProps = useMemo<AgentRowSharedProps>(() => ({
+    orderedAgents,
+    liveCountByAgent,
+    activeAgentId,
+    activeTab,
+    onAgentClick: handleAgentClick,
+    budgetLabel: t("sidebar.agent_paused_by_budget"),
+  }), [orderedAgents, liveCountByAgent, activeAgentId, activeTab, handleAgentClick, t]);
+
+  const listHeight = Math.min(orderedAgents.length * AGENT_ITEM_HEIGHT, MAX_VIRTUAL_LIST_HEIGHT);
 
   return (
     <Collapsible open={open} onOpenChange={setOpen}>
@@ -80,7 +163,7 @@ export function SidebarAgents() {
             <ChevronRight
               className={cn(
                 "h-3 w-3 text-muted-foreground/60 transition-transform opacity-0 group-hover:opacity-100",
-                open && "rotate-90"
+                open && "rotate-90",
               )}
             />
             <span className="text-[10px] font-medium uppercase tracking-widest font-mono text-muted-foreground/60">
@@ -101,48 +184,17 @@ export function SidebarAgents() {
       </div>
 
       <CollapsibleContent>
-        <div className="flex flex-col gap-0.5 mt-0.5">
-          {orderedAgents.map((agent: Agent) => {
-            const runCount = liveCountByAgent.get(agent.id) ?? 0;
-            return (
-              <NavLink
-                key={agent.id}
-                to={activeTab ? `${agentUrl(agent)}/${activeTab}` : agentUrl(agent)}
-                state={SIDEBAR_SCROLL_RESET_STATE}
-                onClick={() => {
-                  if (isMobile) setSidebarOpen(false);
-                }}
-                className={cn(
-                  "flex items-center gap-2.5 px-3 py-1.5 text-[13px] font-medium transition-colors",
-                  activeAgentId === agentRouteRef(agent)
-                    ? "bg-accent text-foreground"
-                    : "text-foreground/80 hover:bg-accent/50 hover:text-foreground"
-                )}
-              >
-                <AgentIcon icon={agent.icon} className="shrink-0 h-3.5 w-3.5 text-muted-foreground" />
-                <span className="flex-1 truncate">{agent.name}</span>
-                {(agent.pauseReason === "budget" || runCount > 0) && (
-                  <span className="ml-auto flex items-center gap-1.5 shrink-0">
-                    {agent.pauseReason === "budget" ? (
-                      <BudgetSidebarMarker title={t("sidebar.agent_paused_by_budget")} />
-                    ) : null}
-                    {runCount > 0 ? (
-                      <span className="relative flex h-2 w-2">
-                        <span className="animate-pulse absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75" />
-                        <span className="relative inline-flex rounded-full h-2 w-2 bg-blue-500" />
-                      </span>
-                    ) : null}
-                    {runCount > 0 ? (
-                      <span className="text-[11px] font-medium text-blue-600 dark:text-blue-400">
-                        {runCount} live
-                      </span>
-                    ) : null}
-                  </span>
-                )}
-              </NavLink>
-            );
-          })}
-        </div>
+        {orderedAgents.length > 0 && (
+          <div className="mt-0.5">
+            <List
+              rowComponent={AgentNavRow}
+              rowCount={orderedAgents.length}
+              rowHeight={AGENT_ITEM_HEIGHT}
+              rowProps={rowProps}
+              style={{ height: listHeight, overflowX: "hidden" }}
+            />
+          </div>
+        )}
       </CollapsibleContent>
     </Collapsible>
   );

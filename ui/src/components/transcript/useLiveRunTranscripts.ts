@@ -87,6 +87,9 @@ export function useLiveRunTranscripts({
   const pendingLogRowsByRunRef = useRef(new Map<string, string>());
   const logOffsetByRunRef = useRef(new Map<string, number>());
   const missingTerminalLogRunIdsRef = useRef(new Set<string>());
+  // Buffered chunk queue — flushed once per animation frame to batch React state updates.
+  const pendingChunkBufferRef = useRef<Map<string, Array<RunLogChunk & { dedupeKey: string }>>>(new Map());
+  const rafIdRef = useRef<number | null>(null);
   // Tick counter to force transcript recomputation when dynamic parser loads
   const [parserTick, setParserTick] = useState(0);
   useEffect(() => {
@@ -107,28 +110,68 @@ export function useLiveRunTranscripts({
     [normalizedRuns],
   );
 
-  const appendChunks = (runId: string, chunks: Array<RunLogChunk & { dedupeKey: string }>) => {
-    if (chunks.length === 0) return;
+  // Flush all buffered chunks in a single batched setState. Called from RAF.
+  const flushChunkBuffer = () => {
+    rafIdRef.current = null;
+    const buffer = pendingChunkBufferRef.current;
+    if (buffer.size === 0) return;
+    // Swap out the buffer atomically before the async setState to avoid losing
+    // chunks that arrive between the RAF callback and the setState callback.
+    const toFlush = buffer;
+    pendingChunkBufferRef.current = new Map();
+
     setChunksByRun((prev) => {
       const next = new Map(prev);
-      const existing = [...(next.get(runId) ?? [])];
       let changed = false;
 
-      for (const chunk of chunks) {
-        if (seenChunkKeysRef.current.has(chunk.dedupeKey)) continue;
-        seenChunkKeysRef.current.add(chunk.dedupeKey);
-        existing.push({ ts: chunk.ts, stream: chunk.stream, chunk: chunk.chunk });
-        changed = true;
+      for (const [runId, chunks] of toFlush) {
+        const existing = [...(next.get(runId) ?? [])];
+        let runChanged = false;
+        for (const chunk of chunks) {
+          if (seenChunkKeysRef.current.has(chunk.dedupeKey)) continue;
+          seenChunkKeysRef.current.add(chunk.dedupeKey);
+          existing.push({ ts: chunk.ts, stream: chunk.stream, chunk: chunk.chunk });
+          runChanged = true;
+        }
+        if (runChanged) {
+          next.set(runId, existing.slice(-maxChunksPerRun));
+          changed = true;
+        }
       }
 
-      if (!changed) return prev;
-      if (seenChunkKeysRef.current.size > 12000) {
+      if (seenChunkKeysRef.current.size > 12_000) {
         seenChunkKeysRef.current.clear();
       }
-      next.set(runId, existing.slice(-maxChunksPerRun));
-      return next;
+      return changed ? next : prev;
     });
   };
+
+  // Buffer incoming chunks and coalesce into a single setState per animation frame.
+  // With 12 parallel runs emitting log events simultaneously this prevents a
+  // React render-storm (O(N×events) renders → O(1) render per frame).
+  const appendChunks = (runId: string, chunks: Array<RunLogChunk & { dedupeKey: string }>) => {
+    if (chunks.length === 0) return;
+    const buffer = pendingChunkBufferRef.current;
+    const existing = buffer.get(runId);
+    if (existing) {
+      for (const c of chunks) existing.push(c);
+    } else {
+      buffer.set(runId, [...chunks]);
+    }
+    if (rafIdRef.current === null) {
+      rafIdRef.current = requestAnimationFrame(flushChunkBuffer);
+    }
+  };
+
+  // Cancel any pending RAF on unmount to prevent setState after unmount.
+  useEffect(() => {
+    return () => {
+      if (rafIdRef.current !== null) {
+        cancelAnimationFrame(rafIdRef.current);
+        rafIdRef.current = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const knownRunIds = new Set(normalizedRuns.map((run) => run.id));
