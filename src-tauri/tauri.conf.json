@@ -37,5 +37,14 @@
       "icons/icon.icns",
       "icons/icon.ico"
     ]
+  },
+  "plugins": {
+    "updater": {
+      "pubkey": "PLACEHOLDER — replace with output of `tauri signer generate -w ~/.tauri/mspro-ltd-corp.key` (public key)",
+      "endpoints": [
+        "https://github.com/vladimirspecalp-hub/MSPro-Ltd-Corp/releases/latest/download/latest.json"
+      ],
+      "dialog": true
+    }
   }
 }
