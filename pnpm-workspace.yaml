@@ -6,3 +6,11 @@ packages:
   - server
   - ui
   - cli
+
+# Rebrand override: scripts/rebrand.ts renames the npm package name
+# `hermes-paperclip-adapter` to `hermes-mspro-ltd-adapter` in package.json,
+# but the actual npm package is only published under the original name.
+# This override keeps the new identifier in source while resolving to the
+# real registry package at install time.
+overrides:
+  hermes-mspro-ltd-adapter: "npm:hermes-paperclip-adapter@^0.2.0"
