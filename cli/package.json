@@ -1,6 +1,6 @@
 {
   "name": "msproltdai",
-  "version": "0.3.1",
+  "version": "0.1.1",
   "description": "MSProLtd CLI — orchestrate AI agent teams to run a business",
   "type": "module",
   "bin": {
