@@ -534,8 +534,14 @@ function toolCountSummary(toolParts: ToolCallMessagePart[]): string | null {
     else other++;
   }
   const parts: string[] = [];
-  if (commands > 0) parts.push(`ran ${commands} command${commands === 1 ? "" : "s"}`);
-  if (other > 0) parts.push(`called ${other} tool${other === 1 ? "" : "s"}`);
+  if (commands > 0) {
+    const word = commands === 1 ? "команду" : commands < 5 ? "команды" : "команд";
+    parts.push(`выполнил ${commands} ${word}`);
+  }
+  if (other > 0) {
+    const word = other === 1 ? "инструмент" : other < 5 ? "инструмента" : "инструментов";
+    parts.push(`вызвал ${other} ${word}`);
+  }
   return parts.join(", ");
 }
 
@@ -590,15 +596,15 @@ function IssueChatChainOfThought() {
   let headerVerb: string;
   let headerSuffix: string | null = null;
   if (isActive) {
-    headerVerb = "Working";
-    if (liveElapsed) headerSuffix = `for ${liveElapsed}`;
+    headerVerb = "Работает";
+    if (liveElapsed) headerSuffix = `${liveElapsed}`;
   } else if (segmentTiming) {
     const durationMs = segmentTiming.endMs - segmentTiming.startMs;
     const durationText = formatDurationWords(durationMs);
-    headerVerb = "Worked";
-    if (durationText) headerSuffix = `for ${durationText}`;
+    headerVerb = "Работал";
+    if (durationText) headerSuffix = `${durationText}`;
   } else {
-    headerVerb = "Worked";
+    headerVerb = "Работал";
   }
 
   const toolSummary = toolCountSummary(toolParts);
