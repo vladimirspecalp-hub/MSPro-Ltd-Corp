@@ -38,6 +38,7 @@ import { PluginSettings } from "./pages/PluginSettings";
 import { AdapterManager } from "./pages/AdapterManager";
 import { PluginPage } from "./pages/PluginPage";
 import { IssueChatUxLab } from "./pages/IssueChatUxLab";
+import { CeoAsk } from "./pages/CeoAsk";
 import { RunTranscriptUxLab } from "./pages/RunTranscriptUxLab";
 import { OrgChart } from "./pages/OrgChart";
 import { NewAgent } from "./pages/NewAgent";
@@ -182,6 +183,7 @@ function boardRoutes() {
       <Route path="inbox/all" element={<Inbox />} />
       <Route path="inbox/new" element={<Navigate to="/inbox/mine" replace />} />
       <Route path="design-guide" element={<DesignGuide />} />
+      <Route path="ceo/ask" element={<CeoAsk />} />
       <Route path="tests/ux/chat" element={<IssueChatUxLab />} />
       <Route path="tests/ux/runs" element={<RunTranscriptUxLab />} />
       <Route path="instance/settings/adapters" element={<AdapterManager />} />

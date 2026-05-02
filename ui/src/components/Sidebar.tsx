@@ -11,6 +11,7 @@ import {
   Boxes,
   Repeat,
   Settings,
+  Sparkles,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { useTranslation } from "react-i18next";
@@ -91,6 +92,7 @@ export function Sidebar() {
             badgeTone={inboxBadge.failedRuns > 0 ? "danger" : "default"}
             alert={inboxBadge.failedRuns > 0}
           />
+          <SidebarNavItem to="/ceo/ask" label="Спросить Гендира" icon={Sparkles} />
           <PluginSlotOutlet
             slotTypes={["sidebar"]}
             context={pluginContext}
