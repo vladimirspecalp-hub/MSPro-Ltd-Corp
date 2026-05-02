@@ -65,4 +65,7 @@ jobs:
             Приложение проверяет обновления при каждом запуске.
           releaseDraft: false
           prerelease: false
+          # Generate latest.json for Tauri auto-updater (consumes .msi + .msi.sig)
+          updaterJsonPreferNsis: false
+          uploadUpdaterJson: true
           args: --bundles msi --target x86_64-pc-windows-msvc
