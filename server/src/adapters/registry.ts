@@ -26,6 +26,7 @@ import { buildExternalAdapters } from "./plugin-loader.js";
 import { getDisabledAdapterTypes } from "../services/adapter-plugin-store.js";
 import { processAdapter } from "./process/index.js";
 import { httpAdapter } from "./http/index.js";
+import { localLlmAdapter } from "./local-llm/index.js";
 
 const claudeLocalAdapter: ServerAdapterModule = {
   type: "claude_local",
@@ -74,12 +75,13 @@ const builtinFallbacks = new Map<string, ServerAdapterModule>();
 const pausedOverrides = new Set<string>();
 
 function registerBuiltInAdapters() {
-  // MSPRO fork: только claude + cursor + process + http
+  // MSPRO fork: claude + cursor + process + http + local_llm (Ollama, P-2026-017 F2)
   for (const adapter of [
     claudeLocalAdapter,
     cursorLocalAdapter,
     processAdapter,
     httpAdapter,
+    localLlmAdapter,
   ]) {
     adaptersByType.set(adapter.type, adapter);
   }
@@ -154,7 +156,7 @@ export function registerServerAdapter(adapter: ServerAdapterModule): void {
 }
 
 export function unregisterServerAdapter(type: string): void {
-  if (type === processAdapter.type || type === httpAdapter.type) return;
+  if (type === processAdapter.type || type === httpAdapter.type || type === localLlmAdapter.type) return;
   if (builtinFallbacks.has(type)) {
     pausedOverrides.delete(type);
     const fallback = builtinFallbacks.get(type);
