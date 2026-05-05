@@ -29,6 +29,7 @@ import { useCompanyPageMemory } from "../hooks/useCompanyPageMemory";
 import { healthApi } from "../api/health";
 import { instanceSettingsApi } from "../api/instanceSettings";
 import { shouldSyncCompanySelectionFromRoute } from "../lib/company-selection";
+import { isTauriEnvironment } from "../lib/ws-host";
 import {
   DEFAULT_INSTANCE_SETTINGS_PATH,
   normalizeRememberedInstanceSettingsPath,
@@ -91,6 +92,7 @@ export function Layout() {
   const [mobileNavVisible, setMobileNavVisible] = useState(true);
   const [instanceSettingsTarget, setInstanceSettingsTarget] = useState<string>(() => readRememberedInstanceSettingsPath());
   const [shortcutsOpen, setShortcutsOpen] = useState(false);
+  const [shellVersion, setShellVersion] = useState<string | null>(null);
   const nextTheme = theme === "dark" ? "light" : "dark";
   const matchedCompany = useMemo(() => {
     if (!companyPrefix) return null;
@@ -113,6 +115,41 @@ export function Layout() {
     queryKey: queryKeys.instance.generalSettings,
     queryFn: () => instanceSettingsApi.getGeneral(),
   }).data?.keyboardShortcuts === true;
+
+  useEffect(() => {
+    if (!isTauriEnvironment()) return;
+    let cancelled = false;
+    import("@tauri-apps/api/app")
+      .then(({ getVersion }) => getVersion())
+      .then((version) => {
+        if (!cancelled) setShellVersion(version);
+      })
+      .catch(() => {
+        // Tauri API unavailable (e.g. browser preview) — keep shellVersion null.
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  const serverVersion = health?.version ?? null;
+  const versionsMismatch = Boolean(
+    shellVersion && serverVersion && shellVersion !== serverVersion,
+  );
+  const versionLabel = versionsMismatch
+    ? `v${shellVersion} (server ${serverVersion})`
+    : "v";
+  const versionTooltip =
+    shellVersion && serverVersion
+      ? versionsMismatch
+        ? `shell ${shellVersion} · server ${serverVersion}`
+        : `v${shellVersion}`
+      : serverVersion
+        ? `v${serverVersion}`
+        : shellVersion
+          ? `v${shellVersion}`
+          : null;
+  const hasAnyVersion = Boolean(shellVersion || serverVersion);
 
   useEffect(() => {
     if (companiesLoading || onboardingTriggered.current) return;
@@ -365,12 +402,23 @@ export function Layout() {
                   <BookOpen className="h-4 w-4 shrink-0" />
                   <span className="truncate">{t("layout.documentation")}</span>
                 </a>
-                {health?.version && (
+                {hasAnyVersion && (
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <span className="px-2 text-xs text-muted-foreground shrink-0 cursor-default">v</span>
+                      <span
+                        className={cn(
+                          "px-2 text-xs shrink-0 cursor-default",
+                          versionsMismatch
+                            ? "text-amber-600 dark:text-amber-400 font-medium"
+                            : "text-muted-foreground",
+                        )}
+                        data-testid="layout-version"
+                        data-version-mismatch={versionsMismatch ? "true" : "false"}
+                      >
+                        {versionLabel}
+                      </span>
                     </TooltipTrigger>
-                    <TooltipContent>v{health.version}</TooltipContent>
+                    {versionTooltip && <TooltipContent>{versionTooltip}</TooltipContent>}
                   </Tooltip>
                 )}
                 <Button variant="ghost" size="icon-sm" className="text-muted-foreground shrink-0" asChild>
@@ -424,12 +472,23 @@ export function Layout() {
                   <BookOpen className="h-4 w-4 shrink-0" />
                   <span className="truncate">{t("layout.documentation")}</span>
                 </a>
-                {health?.version && (
+                {hasAnyVersion && (
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <span className="px-2 text-xs text-muted-foreground shrink-0 cursor-default">v</span>
+                      <span
+                        className={cn(
+                          "px-2 text-xs shrink-0 cursor-default",
+                          versionsMismatch
+                            ? "text-amber-600 dark:text-amber-400 font-medium"
+                            : "text-muted-foreground",
+                        )}
+                        data-testid="layout-version"
+                        data-version-mismatch={versionsMismatch ? "true" : "false"}
+                      >
+                        {versionLabel}
+                      </span>
                     </TooltipTrigger>
-                    <TooltipContent>v{health.version}</TooltipContent>
+                    {versionTooltip && <TooltipContent>{versionTooltip}</TooltipContent>}
                   </Tooltip>
                 )}
                 <Button variant="ghost" size="icon-sm" className="text-muted-foreground shrink-0" asChild>
