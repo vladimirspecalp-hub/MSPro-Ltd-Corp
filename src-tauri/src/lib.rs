@@ -1,3 +1,5 @@
+mod updater;
+
 use std::path::PathBuf;
 use std::process::Command;
 use std::thread;
@@ -81,6 +83,11 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
+        .invoke_handler(tauri::generate_handler![
+            updater::check_for_update,
+            updater::install_update_with_backup,
+            updater::list_backups,
+        ])
         .run(tauri::generate_context!())
         .expect("error while running MSPro-Ltd Corp desktop application");
 }
