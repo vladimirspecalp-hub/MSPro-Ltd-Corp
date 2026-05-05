@@ -8,9 +8,16 @@ import {
   MONTHLY_RETENTION_PRESETS,
   DEFAULT_BACKUP_RETENTION,
 } from "@msproltd/shared";
-import { Globe, LogOut, SlidersHorizontal } from "lucide-react";
+import { Download, Globe, LogOut, RotateCcw, SlidersHorizontal } from "lucide-react";
 import { authApi } from "@/api/auth";
 import { instanceSettingsApi } from "@/api/instanceSettings";
+import {
+  updaterApi,
+  type BackupInfo,
+  type UpdateInfo,
+  type UpdateProgressEvent,
+} from "@/api/updater";
+import { Badge } from "../components/ui/badge";
 import { Button } from "../components/ui/button";
 import { useBreadcrumbs } from "../context/BreadcrumbContext";
 import { queryKeys } from "../lib/queryKeys";
@@ -330,6 +337,8 @@ export function InstanceGeneralSettings() {
         </div>
       </section>
 
+      <UpdatesSection />
+
       <section className="rounded-xl border border-border bg-card p-5">
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-1.5">
@@ -350,5 +359,265 @@ export function InstanceGeneralSettings() {
         </div>
       </section>
     </div>
+  );
+}
+
+type UpdateProgressState =
+  | { kind: "idle" }
+  | { kind: "started" }
+  | { kind: "downloading"; downloaded: number; total: number | null }
+  | { kind: "verifying" }
+  | { kind: "installing" }
+  | { kind: "done" };
+
+function progressPercent(state: UpdateProgressState): number {
+  switch (state.kind) {
+    case "idle":
+      return 0;
+    case "started":
+      return 2;
+    case "downloading": {
+      if (!state.total || state.total <= 0) return 5;
+      const pct = (state.downloaded / state.total) * 80;
+      return Math.max(5, Math.min(80, Math.round(pct)));
+    }
+    case "verifying":
+      return 85;
+    case "installing":
+      return 95;
+    case "done":
+      return 100;
+  }
+}
+
+function formatTimestamp(value: string, locale: string): string {
+  try {
+    return new Date(value).toLocaleString(locale === "ru" ? "ru-RU" : "en-US", {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
+  } catch {
+    return value;
+  }
+}
+
+function UpdatesSection() {
+  const { t, i18n } = useTranslation();
+  const queryClient = useQueryClient();
+  const [updateError, setUpdateError] = useState<string | null>(null);
+  const [progress, setProgress] = useState<UpdateProgressState>({ kind: "idle" });
+
+  const updateInfoQuery = useQuery<UpdateInfo, Error>({
+    queryKey: ["updater", "checkForUpdate"],
+    queryFn: () => updaterApi.checkForUpdate(),
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+
+  const backupsQuery = useQuery<BackupInfo[], Error>({
+    queryKey: ["updater", "listBackups"],
+    queryFn: () => updaterApi.listBackups(),
+    retry: false,
+    refetchOnWindowFocus: false,
+  });
+
+  const installMutation = useMutation({
+    mutationFn: async () => {
+      setUpdateError(null);
+      setProgress({ kind: "started" });
+      await updaterApi.installUpdate((event: UpdateProgressEvent) => {
+        switch (event.event) {
+          case "started":
+            setProgress({ kind: "started" });
+            break;
+          case "progress":
+            setProgress({
+              kind: "downloading",
+              downloaded: event.data.downloaded,
+              total: event.data.total,
+            });
+            break;
+          case "verifying":
+            setProgress({ kind: "verifying" });
+            break;
+          case "installing":
+            setProgress({ kind: "installing" });
+            break;
+          case "done":
+            setProgress({ kind: "done" });
+            break;
+        }
+      });
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["updater"] });
+    },
+    onError: (error) => {
+      setUpdateError(error instanceof Error ? error.message : t("instance.updates_install_failed"));
+      setProgress({ kind: "idle" });
+    },
+  });
+
+  const rollbackMutation = useMutation({
+    mutationFn: async () => {
+      setUpdateError(null);
+      await updaterApi.rollbackToBackup();
+    },
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["updater"] });
+    },
+    onError: (error) => {
+      setUpdateError(error instanceof Error ? error.message : t("instance.updates_rollback_failed"));
+    },
+  });
+
+  const info = updateInfoQuery.data;
+  const backups = backupsQuery.data ?? [];
+  const hasBackups = backups.length > 0;
+  const isChecking = updateInfoQuery.isFetching;
+  const isInstalling = installMutation.isPending;
+  const isRollingBack = rollbackMutation.isPending;
+  const updateAvailable = info?.available === true && !!info.newVersion;
+  const showProgress = isInstalling || progress.kind !== "idle";
+  const percent = progressPercent(progress);
+
+  let progressLabel = "";
+  switch (progress.kind) {
+    case "started":
+      progressLabel = t("instance.updates_progress_started");
+      break;
+    case "downloading":
+      progressLabel = t("instance.updates_progress_downloading", { percent });
+      break;
+    case "verifying":
+      progressLabel = t("instance.updates_progress_verifying");
+      break;
+    case "installing":
+      progressLabel = t("instance.updates_progress_installing");
+      break;
+    case "done":
+      progressLabel = t("instance.updates_progress_done");
+      break;
+    default:
+      progressLabel = "";
+  }
+
+  const checkErrorMsg = updateInfoQuery.error
+    ? updateInfoQuery.error.message || t("instance.updates_check_failed")
+    : null;
+  const backupsErrorMsg = backupsQuery.error
+    ? backupsQuery.error.message || t("instance.updates_load_backups_failed")
+    : null;
+
+  return (
+    <section className="rounded-xl border border-border bg-card p-5">
+      <div className="space-y-5">
+        <div className="space-y-1.5">
+          <h2 className="text-sm font-semibold">{t("instance.updates_title")}</h2>
+          <p className="max-w-2xl text-sm text-muted-foreground">
+            {t("instance.updates_help")}
+          </p>
+        </div>
+
+        {(updateError || checkErrorMsg) && (
+          <div className="rounded-md border border-destructive/40 bg-destructive/5 px-3 py-2 text-sm text-destructive">
+            {updateError ?? checkErrorMsg}
+          </div>
+        )}
+
+        <div className="grid gap-3 sm:grid-cols-2">
+          <div className="rounded-lg border border-border bg-background px-3 py-2">
+            <div className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+              {t("instance.updates_current_version")}
+            </div>
+            <div className="text-sm font-medium">
+              {info?.currentVersion ?? (isChecking ? t("instance.updates_checking") : "—")}
+            </div>
+          </div>
+          <div className="rounded-lg border border-border bg-background px-3 py-2">
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                {t("instance.updates_available_version")}
+              </span>
+              {updateAvailable && (
+                <Badge variant="default" className="text-[10px] tracking-wide">
+                  {t("instance.updates_new_badge")}
+                </Badge>
+              )}
+            </div>
+            <div className="text-sm font-medium">
+              {info?.newVersion
+                ?? (isChecking ? t("instance.updates_checking") : info ? t("instance.updates_up_to_date") : "—")}
+            </div>
+          </div>
+        </div>
+
+        {showProgress && (
+          <div className="space-y-1.5">
+            <div className="text-xs text-muted-foreground">{progressLabel}</div>
+            <div className="h-2 w-full overflow-hidden rounded-full bg-muted">
+              <div
+                className="h-full bg-primary transition-all duration-200"
+                style={{ width: `${percent}%` }}
+              />
+            </div>
+          </div>
+        )}
+
+        <div className="flex flex-wrap items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={isChecking || isInstalling || isRollingBack}
+            onClick={() => updateInfoQuery.refetch()}
+          >
+            {isChecking ? t("instance.updates_checking") : t("instance.updates_check_button")}
+          </Button>
+          <Button
+            variant="default"
+            size="sm"
+            disabled={!updateAvailable || isInstalling || isRollingBack}
+            onClick={() => installMutation.mutate()}
+          >
+            <Download className="size-4" />
+            {isInstalling ? t("instance.updates_installing") : t("instance.updates_install_button")}
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            disabled={!hasBackups || isInstalling || isRollingBack}
+            onClick={() => rollbackMutation.mutate()}
+          >
+            <RotateCcw className="size-4" />
+            {isRollingBack ? t("instance.updates_rolling_back") : t("instance.updates_rollback_button")}
+          </Button>
+        </div>
+
+        <div className="space-y-1.5">
+          <h3 className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+            {t("instance.updates_backups_title")}
+          </h3>
+          {backupsErrorMsg ? (
+            <div className="text-sm text-destructive">{backupsErrorMsg}</div>
+          ) : !hasBackups ? (
+            <div className="text-sm text-muted-foreground">{t("instance.updates_no_backups")}</div>
+          ) : (
+            <ul className="divide-y divide-border rounded-lg border border-border bg-background">
+              {backups.map((backup) => (
+                <li
+                  key={`${backup.version}-${backup.installedAt}`}
+                  className="flex items-center justify-between px-3 py-2 text-sm"
+                >
+                  <span className="font-medium">v{backup.version}</span>
+                  <span className="text-xs text-muted-foreground">
+                    {formatTimestamp(backup.installedAt, i18n.language)}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+        </div>
+      </div>
+    </section>
   );
 }
