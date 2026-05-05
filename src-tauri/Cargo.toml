@@ -1,6 +1,6 @@
 [package]
 name = "mspro-ltd-corp"
-version = "0.1.4"
+version = "0.1.5"
 description = "MSPro-Ltd Corp — Desktop Application"
 authors = ["MSPro-Ltd Corp"]
 edition = "2021"
