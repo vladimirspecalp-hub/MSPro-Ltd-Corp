@@ -11,6 +11,8 @@ import { ExternalLink } from "lucide-react";
 import { Identity } from "./Identity";
 import { RunChatSurface } from "./RunChatSurface";
 import { useLiveRunTranscripts } from "./transcript/useLiveRunTranscripts";
+import { Badge } from "./ui/badge";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "./ui/tooltip";
 
 const MIN_DASHBOARD_RUNS = 4;
 
@@ -115,6 +117,25 @@ function AgentRunCard({
             </div>
             <div className="mt-2 flex items-center gap-2 text-[11px] text-muted-foreground">
               <span>{isActive ? "Сейчас активен" : run.finishedAt ? `Завершён ${relativeTime(run.finishedAt)}` : `Запущен ${relativeTime(run.createdAt)}`}</span>
+              {run.metadata?.fallback && (
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Badge
+                        data-testid="local-qwen3-badge"
+                        className="cursor-help border border-yellow-500/40 bg-yellow-400/15 text-[10px] font-medium text-yellow-900 hover:bg-yellow-400/25 dark:text-yellow-200"
+                      >
+                        Local Qwen3
+                      </Badge>
+                    </TooltipTrigger>
+                    <TooltipContent side="top" className="max-w-[260px] text-xs">
+                      Run завершён на резервной модели {run.metadata.fallback.model ?? "Qwen3:14b"}.
+                      {run.metadata.fallback.reason ? ` Причина: ${run.metadata.fallback.reason}.` : ""}
+                      {" "}Качество может быть ниже.
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+              )}
             </div>
           </div>
 

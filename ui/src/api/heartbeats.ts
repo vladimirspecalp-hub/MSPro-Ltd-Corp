@@ -15,6 +15,16 @@ export interface ActiveRunForIssue {
   issueId?: string | null;
 }
 
+export interface RunFallbackMetadata {
+  model?: string;
+  reason?: string;
+}
+
+export interface RunMetadata {
+  fallback?: RunFallbackMetadata;
+  [key: string]: unknown;
+}
+
 export interface LiveRunForIssue {
   id: string;
   status: string;
@@ -27,6 +37,7 @@ export interface LiveRunForIssue {
   agentName: string;
   adapterType: string;
   issueId?: string | null;
+  metadata?: RunMetadata | null;
 }
 
 export const heartbeatsApi = {
