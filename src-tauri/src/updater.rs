@@ -12,6 +12,7 @@
 
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::process::Command;
 use std::sync::{Arc, Mutex};
 use std::time::SystemTime;
 
@@ -389,4 +390,74 @@ pub fn list_backups() -> Result<Vec<BackupInfo>, String> {
     // monotonic for values of the same length).
     backups.sort_by(|a, b| b.installed_at.cmp(&a.installed_at));
     Ok(backups)
+}
+
+// ----------------------------------------------------------------------------
+// Rollback (MSP-238)
+// ----------------------------------------------------------------------------
+
+/// Find the most recent backup directory under `backups_root()` (newest by
+/// directory mtime) and return the path to its first `.msi` file.
+fn latest_backup_msi() -> Result<PathBuf, String> {
+    let root = backups_root()?;
+    if !root.exists() {
+        return Err("no backups directory".to_string());
+    }
+
+    let mut entries: Vec<(PathBuf, SystemTime)> = fs::read_dir(&root)
+        .map_err(|e| format!("read_dir backups: {}", e))?
+        .filter_map(|e| e.ok())
+        .filter(|e| e.path().is_dir())
+        .filter_map(|e| {
+            let modified = e.metadata().ok()?.modified().ok()?;
+            Some((e.path(), modified))
+        })
+        .collect();
+
+    if entries.is_empty() {
+        return Err("no backups available".to_string());
+    }
+    entries.sort_by(|a, b| b.1.cmp(&a.1));
+
+    for (dir, _) in entries {
+        if let Ok(rd) = fs::read_dir(&dir) {
+            for entry in rd.flatten() {
+                let path = entry.path();
+                if path.is_file()
+                    && path.extension().and_then(|s| s.to_str()) == Some("msi")
+                {
+                    return Ok(path);
+                }
+            }
+        }
+    }
+    Err("no .msi found in any backup".to_string())
+}
+
+/// Rollback to the most recent backup. Runs `msiexec /i <backup.msi>
+/// /quiet /norestart` to silently reinstall the previous version, waits for
+/// it to exit, then triggers `app.restart()` so the new (older) binary is
+/// loaded. The MSI installer replaces the currently running executable on
+/// disk; the actual hot-swap happens after restart.
+#[tauri::command]
+pub async fn rollback(app: AppHandle) -> Result<(), String> {
+    let msi = latest_backup_msi()?;
+
+    let status = Command::new("msiexec")
+        .arg("/i")
+        .arg(&msi)
+        .arg("/quiet")
+        .arg("/norestart")
+        .status()
+        .map_err(|e| format!("failed to spawn msiexec: {}", e))?;
+
+    if !status.success() {
+        return Err(format!(
+            "msiexec exited with non-zero status: {}",
+            status.code().map(|c| c.to_string()).unwrap_or_else(|| "unknown".to_string())
+        ));
+    }
+
+    // Replace current process with the newly-installed (older) binary.
+    app.restart();
 }

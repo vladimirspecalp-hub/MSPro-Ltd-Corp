@@ -7,6 +7,18 @@
     "core:default",
     "opener:default",
     "shell:default",
-    "updater:default"
+    "updater:default",
+    "process:allow-restart",
+    {
+      "identifier": "shell:allow-execute",
+      "allow": [
+        {
+          "name": "msiexec",
+          "cmd": "msiexec.exe",
+          "args": true,
+          "sidecar": false
+        }
+      ]
+    }
   ]
 }

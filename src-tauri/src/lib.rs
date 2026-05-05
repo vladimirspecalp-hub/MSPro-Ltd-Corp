@@ -83,10 +83,12 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
+        .plugin(tauri_plugin_process::init())
         .invoke_handler(tauri::generate_handler![
             updater::check_for_update,
             updater::install_update_with_backup,
             updater::list_backups,
+            updater::rollback,
         ])
         .run(tauri::generate_context!())
         .expect("error while running MSPro-Ltd Corp desktop application");
