@@ -43,6 +43,9 @@ jobs:
         with:
           workspaces: src-tauri -> target
 
+      - name: Sync version from tag
+        run: node scripts/sync-version.mjs ${{ github.ref_name }}
+
       - name: Install Node.js dependencies
         run: pnpm install --no-frozen-lockfile
 
