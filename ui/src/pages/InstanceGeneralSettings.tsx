@@ -11,6 +11,7 @@ import {
 import { Download, Globe, LogOut, RotateCcw, SlidersHorizontal } from "lucide-react";
 import { authApi } from "@/api/auth";
 import { instanceSettingsApi } from "@/api/instanceSettings";
+import { isTauriEnvironment } from "@/lib/ws-host";
 import {
   updaterApi,
   type BackupInfo,
@@ -337,7 +338,7 @@ export function InstanceGeneralSettings() {
         </div>
       </section>
 
-      <UpdatesSection />
+      {isTauriEnvironment() && <UpdatesSection />}
 
       <section className="rounded-xl border border-border bg-card p-5">
         <div className="flex items-start justify-between gap-4">
@@ -503,10 +504,10 @@ function UpdatesSection() {
   }
 
   const checkErrorMsg = updateInfoQuery.error
-    ? updateInfoQuery.error.message || t("instance.updates_check_failed")
+    ? t("instance.updates_check_failed")
     : null;
   const backupsErrorMsg = backupsQuery.error
-    ? backupsQuery.error.message || t("instance.updates_load_backups_failed")
+    ? t("instance.updates_load_backups_failed")
     : null;
 
   return (
