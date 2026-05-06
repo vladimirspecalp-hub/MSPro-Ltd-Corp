@@ -17,6 +17,10 @@
           "cmd": "msiexec.exe",
           "args": true,
           "sidecar": false
+        },
+        {
+          "name": "server",
+          "sidecar": true
         }
       ]
     }

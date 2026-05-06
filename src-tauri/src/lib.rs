@@ -1,9 +1,13 @@
 mod updater;
 
 use std::path::PathBuf;
-use std::process::Command;
-use std::thread;
-use std::time::Duration;
+use std::sync::{Mutex, OnceLock};
+
+use tauri_plugin_shell::process::CommandChild;
+use tauri_plugin_shell::ShellExt;
+
+/// Singleton holding the spawned server sidecar child process.
+static SERVER_CHILD: OnceLock<Mutex<Option<CommandChild>>> = OnceLock::new();
 
 /// Resolve the GPU mode flag file path, mirroring the Node.js `resolveGpuModeFlagPath()`.
 /// Default: `~/.mspro-ltd/instances/default/gpu-mode.flag`.
@@ -39,57 +43,58 @@ fn apply_gpu_mode_if_enabled() {
     }
 }
 
-/// Spawn the embedded MSPro-Ltd Corp server (Node.js) on port 3100.
-/// In dev mode (`pnpm tauri dev`) the server is expected to be running already
-/// (started by `beforeDevCommand`). In production builds the sidecar binary
-/// is used instead.
-fn spawn_server() {
-    thread::spawn(|| {
-        // Wait briefly for Tauri window to initialise before starting the backend.
-        thread::sleep(Duration::from_millis(500));
-
-        // Production: run the compiled server bundle.
-        // Adjust path if the server output location changes.
-        let server_js = std::env::current_exe()
-            .ok()
-            .and_then(|p| p.parent().map(|d| d.join("server").join("index.js")));
-
-        if let Some(path) = server_js {
-            if path.exists() {
-                let _ = Command::new("node")
-                    .arg(&path)
-                    .env("PORT", "3100")
-                    .env("NODE_ENV", "production")
-                    .spawn();
-            }
+/// Spawn the MSPro-Ltd Corp server as a Tauri ShellExt sidecar.
+/// The binary is registered via `bundle.externalBin = ["binaries/server"]` in tauri.conf.json.
+/// On success the `CommandChild` is stored in `SERVER_CHILD` for later cleanup.
+fn spawn_server(app: &tauri::AppHandle) {
+    let cell = SERVER_CHILD.get_or_init(|| Mutex::new(None));
+    match app
+        .shell()
+        .sidecar("server")
+        .and_then(|cmd| {
+            cmd.env("PORT", "3100")
+                .env("NODE_ENV", "production")
+                .spawn()
+        }) {
+        Ok((_rx, child)) => {
+            let mut guard = cell.lock().unwrap();
+            *guard = Some(child);
         }
-    });
+        Err(e) => eprintln!("[devops] server sidecar spawn failed: {e}"),
+    }
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
     // Apply GPU mode flags from flag file before WebView2 initialises.
-    // The flag file is written/removed by the server when the user toggles
-    // "Усиленный режим (GPU)" in Settings → General.
     apply_gpu_mode_if_enabled();
-
-    // Only spawn the embedded server in production (release) builds.
-    // Embedded server bundling not implemented yet (P-2026-021 backlog).
-    // App expects external MSProLtd server on http://127.0.0.1:3100 in v0.1.0.
-    // spawn_server() disabled to prevent silent failures.
-    let _ = spawn_server;
 
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_shell::init())
         .plugin(tauri_plugin_updater::Builder::new().build())
         .plugin(tauri_plugin_process::init())
+        .setup(|app| {
+            spawn_server(app.handle());
+            Ok(())
+        })
         .invoke_handler(tauri::generate_handler![
             updater::check_for_update,
             updater::install_update_with_backup,
             updater::list_backups,
             updater::rollback,
         ])
+        .on_window_event(|_window, event| {
+            if let tauri::WindowEvent::CloseRequested { .. } = event {
+                if let Some(cell) = SERVER_CHILD.get() {
+                    if let Ok(mut guard) = cell.lock() {
+                        if let Some(child) = guard.take() {
+                            let _ = child.kill();
+                        }
+                    }
+                }
+            }
+        })
         .run(tauri::generate_context!())
         .expect("error while running MSPro-Ltd Corp desktop application");
 }
