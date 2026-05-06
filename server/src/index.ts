@@ -1,7 +1,7 @@
 /// <reference path="./types/express.d.ts" />
 import { existsSync, readFileSync, rmSync } from "node:fs";
 import { createServer } from "node:http";
-import { resolve } from "node:path";
+import { dirname, join, resolve } from "node:path";
 import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
 import { pathToFileURL } from "node:url";
@@ -91,7 +91,17 @@ export async function startServer(): Promise<StartedServer> {
   if (process.env.MSPROLTD_SECRETS_MASTER_KEY_FILE === undefined) {
     process.env.MSPROLTD_SECRETS_MASTER_KEY_FILE = config.secretsMasterKeyFilePath;
   }
-  
+
+  // Pre-set PGEMBED_CACHE_DIR so embedded-postgres uses the bundled binary
+  // instead of downloading. In Tauri desktop builds the launcher sets this env
+  // var to resources/postgres-binary/. When running as a Node SEA without an
+  // explicit override, resolve relative to the executable directory so the
+  // bundled resources are found even without node_modules.
+  if (process.env.PGEMBED_CACHE_DIR === undefined) {
+    const exeDir = dirname(process.execPath);
+    process.env.PGEMBED_CACHE_DIR = join(exeDir, "resources", "postgres-binary");
+  }
+
   type MigrationSummary =
     | "skipped"
     | "already applied"

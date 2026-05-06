@@ -1,3 +1,25 @@
+diff --git a/dist/binary.js b/dist/binary.js
+--- a/dist/binary.js
++++ b/dist/binary.js
+@@ -1,5 +1,17 @@
+ import os from 'os';
++import path from 'path';
+ function getBinaries() {
++    // If PGEMBED_CACHE_DIR is set, use pre-bundled binaries from that directory.
++    // This enables offline operation when postgres binaries are bundled with
++    // the Tauri app in resources/postgres-binary/ and PGEMBED_CACHE_DIR is set
++    // to that path by the launcher.
++    const cacheDir = process.env.PGEMBED_CACHE_DIR;
++    if (cacheDir) {
++        return Promise.resolve({
++            postgres: path.join(cacheDir, 'bin', 'postgres.exe'),
++            pg_ctl: path.join(cacheDir, 'bin', 'pg_ctl.exe'),
++            initdb: path.join(cacheDir, 'bin', 'initdb.exe'),
++        });
++    }
+     const arch = os.arch();
+     const platform = os.platform();
+     switch (platform) {
 diff --git a/dist/index.js b/dist/index.js
 --- a/dist/index.js
 +++ b/dist/index.js

@@ -21,29 +21,49 @@ fs.mkdirSync(logDir, { recursive: true });
 
 const logFile = path.join(logDir, "server.log");
 
+// Detect Node SEA mode — pino.transport() uses worker threads which cannot
+// resolve pino-pretty inside a SEA binary, so we fall back to direct streams.
+let runningAsSea = false;
+try {
+  // Available since Node v21.7 / v20.12
+  runningAsSea = (require("node:sea") as { isSea(): boolean }).isSea();
+} catch {
+  runningAsSea = false;
+}
+
 const sharedOpts = {
   translateTime: "SYS:HH:MM:ss",
   ignore: "pid,hostname",
   singleLine: true,
 };
 
-export const logger = pino({
-  level: "debug",
-  redact: ["req.headers.authorization"],
-}, pino.transport({
-  targets: [
-    {
-      target: "pino-pretty",
-      options: { ...sharedOpts, ignore: "pid,hostname,req,res,responseTime", colorize: true, destination: 1 },
-      level: "info",
-    },
-    {
-      target: "pino-pretty",
-      options: { ...sharedOpts, colorize: false, destination: logFile, mkdir: true },
+export const logger: pino.Logger = runningAsSea
+  ? // In SEA: write plain JSON to stdout + file via direct pino.multistream()
+    pino(
+      { level: "debug", redact: ["req.headers.authorization"] },
+      pino.multistream([
+        { stream: pino.destination(1), level: "info" as pino.Level },
+        { stream: pino.destination({ dest: logFile, sync: false, mkdir: true }), level: "debug" as pino.Level },
+      ]),
+    )
+  : // In dev/non-SEA: pretty-print via transport workers as before
+    pino({
       level: "debug",
-    },
-  ],
-}));
+      redact: ["req.headers.authorization"],
+    }, pino.transport({
+      targets: [
+        {
+          target: "pino-pretty",
+          options: { ...sharedOpts, ignore: "pid,hostname,req,res,responseTime", colorize: true, destination: 1 },
+          level: "info",
+        },
+        {
+          target: "pino-pretty",
+          options: { ...sharedOpts, colorize: false, destination: logFile, mkdir: true },
+          level: "debug",
+        },
+      ],
+    }));
 
 export const httpLogger = pinoHttp({
   logger,

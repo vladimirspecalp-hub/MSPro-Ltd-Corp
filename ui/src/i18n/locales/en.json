@@ -3,6 +3,12 @@
     "name": "MSPRO Operations",
     "tagline": "MSPRO AI employee management"
   },
+  "newAgentDialog": {
+    "title": "Add a new agent",
+    "recommendation": "We recommend letting your CEO handle agent setup — they know the org structure and can configure reporting, permissions, and adapters.",
+    "askCeo": "Ask the CEO to create a new agent",
+    "advancedConfig": "I want advanced configuration myself"
+  },
   "language": {
     "label": "Interface language",
     "ru": "Русский",
