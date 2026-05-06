@@ -1,7 +1,9 @@
 import { Navigate, Outlet, Route, Routes, useLocation, useParams } from "@/lib/router";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Button } from "@/components/ui/button";
+import { SplashScreen } from "./components/SplashScreen";
 import { Layout } from "./components/Layout";
 import { OnboardingWizard } from "./components/OnboardingWizard";
 import { authApi } from "./api/auth";
@@ -318,6 +320,12 @@ function NoCompaniesStartPage() {
 }
 
 export function App() {
+  const [serverReady, setServerReady] = useState(false);
+
+  if (!serverReady) {
+    return <SplashScreen onReady={() => setServerReady(true)} />;
+  }
+
   return (
     <>
       <Routes>
