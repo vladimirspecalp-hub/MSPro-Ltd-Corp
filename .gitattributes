@@ -1,0 +1,9 @@
+# Ensure patches always have LF line endings (CRLF breaks pnpm patch)
+patches/*.patch text eol=lf
+
+# Shell scripts and CI configs
+*.sh text eol=lf
+.github/**/*.yml text eol=lf
+
+# Default: text auto
+* text=auto

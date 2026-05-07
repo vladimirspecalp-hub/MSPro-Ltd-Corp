@@ -43,6 +43,12 @@ fn apply_gpu_mode_if_enabled() {
     }
 }
 
+/// Windows CREATE_NO_WINDOW flag — suppresses the black console window
+/// that would otherwise flash when spawning a CONSOLE-subsystem child process
+/// (Node/Postgres SEA-wrapped server.exe in our case).
+#[cfg(windows)]
+const CREATE_NO_WINDOW: u32 = 0x0800_0000;
+
 /// Spawn the MSPro-Ltd Corp server as a Tauri ShellExt sidecar.
 /// The binary is registered via `bundle.externalBin = ["binaries/server"]` in tauri.conf.json.
 /// On success the `CommandChild` is stored in `SERVER_CHILD` for later cleanup.
@@ -52,9 +58,12 @@ fn spawn_server(app: &tauri::AppHandle) {
         .shell()
         .sidecar("server")
         .and_then(|cmd| {
-            cmd.env("PORT", "3100")
-                .env("NODE_ENV", "production")
-                .spawn()
+            let cmd = cmd
+                .env("PORT", "3100")
+                .env("NODE_ENV", "production");
+            #[cfg(windows)]
+            let cmd = cmd.creation_flags(CREATE_NO_WINDOW);
+            cmd.spawn()
         }) {
         Ok((_rx, child)) => {
             let mut guard = cell.lock().unwrap();
